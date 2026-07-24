@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { DatePicker, TimePicker, ConfigProvider, theme } from 'antd';
+import dayjs from 'dayjs';
 import {
   Calendar,
   Clock,
   Target,
-  Users,
   Image as ImageIcon,
-  QrCode,
   Megaphone,
   PlusCircle,
   Edit3,
@@ -25,39 +25,52 @@ import {
 } from 'lucide-react';
 import { useStore, Batch } from '../store/useStore';
 
-// Preset Avatars for quick selection
+const pickerTheme = {
+  algorithm: theme.darkAlgorithm,
+  token: {
+    colorPrimary: '#3b82f6',
+    colorBgContainer: 'rgba(15, 23, 42, 0.6)',
+    colorBgElevated: '#1e293b',
+    colorText: '#f8fafc',
+    colorTextPlaceholder: '#64748b',
+    colorBorder: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 12,
+  },
+};
+
+// Preset Avatars for quick selection (Official Survivor.io Agents)
 const PRESET_AVATARS = [
   {
-    name: '特工阿猫',
-    url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=120&auto=format&fit=crop&q=80',
+    name: '科萌',
+    url: '/avatars/科萌.png',
   },
   {
-    name: '特工阿狗',
-    url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
+    name: '凯蒂斯',
+    url: '/avatars/凯蒂斯.png',
   },
   {
-    name: '特工熊熊',
-    url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80',
+    name: '沃尔默',
+    url: '/avatars/沃尔默.png',
   },
   {
-    name: '特工狐狐',
-    url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80',
-  },
-];
-
-// Preset QR Code templates for quick creation
-const PRESET_QRS = [
-  {
-    label: '冲刺106分群',
-    url: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup106',
+    name: '金',
+    url: '/avatars/金.png',
   },
   {
-    label: '早班车组队群',
-    url: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MorningGroup',
+    name: '月咏',
+    url: '/avatars/月咏.png',
   },
   {
-    label: '夜战精英群',
-    url: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=NightGroup',
+    name: '杨大师',
+    url: '/avatars/杨大师.png',
+  },
+  {
+    name: '凛音',
+    url: '/avatars/凛音.png',
+  },
+  {
+    name: '乔伊',
+    url: '/avatars/乔伊.png',
   },
 ];
 
@@ -65,16 +78,13 @@ export const AdminPanel: React.FC = () => {
   const { batches, addBatch, updateBatch, deleteBatch, markBatchInvalid } =
     useStore();
 
-  // Form State with specified defaults: targetScore = 106, maxCapacity = 200
+  // Form State with specified defaults: targetScore = 66, notice = ''
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     time: '20:00:00',
-    targetScore: 106,
-    maxCapacity: 200,
+    targetScore: 66,
     avatarUrl: PRESET_AVATARS[0].url,
-    qrCodeUrl: PRESET_QRS[0].url,
-    notice:
-      '【全员必看】统一佩戴指定战队头像！请在入场后控制输出，达到 106 分即刻停手共享史诗配件！',
+    notice: '',
   });
 
   // UI States
@@ -102,15 +112,20 @@ export const AdminPanel: React.FC = () => {
       return;
     }
 
+    const formattedDate = formData.date.replace(/-/g, '');
+    const formattedTime = formData.time.substring(0, 5).replace(':', '');
+    const targetScore = Number(formData.targetScore) || 66;
+    const generatedId = `${formattedDate}-${formattedTime}-${targetScore}`;
+
     const newBatch: Batch = {
-      id: `batch-${Date.now().toString().slice(-6)}`,
+      id: generatedId,
       date: formData.date,
       time: formData.time,
-      targetScore: Number(formData.targetScore) || 106,
-      maxCapacity: Number(formData.maxCapacity) || 200,
+      targetScore,
+      maxCapacity: 200,
       currentCount: 0,
       avatarUrl: formData.avatarUrl.trim(),
-      qrCodeUrl: formData.qrCodeUrl.trim(),
+      qrCodeUrl: '',
       notice: formData.notice.trim(),
       status: 'active',
     };
@@ -122,8 +137,7 @@ export const AdminPanel: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       time: '21:00:00',
-      notice:
-        '【新发车班次】统一头像入场，目标 106 分并列拿满奖励！',
+      notice: '',
     }));
   };
 
@@ -180,24 +194,16 @@ export const AdminPanel: React.FC = () => {
         <div className="absolute -right-10 -top-10 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> 创作者控制台
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> 权限已认证
-              </span>
-            </div>
             <h1 className="text-2xl md:text-3xl font-black text-slate-100 tracking-tight">
               发车班次管理与控制中心
             </h1>
             <p className="text-xs text-slate-400">
-              发布新发车班次、配置战队统一头像、微信群二维码及查看管理已发布车次。
+              发布新发车班次、配置战队统一头像及查看管理已发布车次。
             </p>
           </div>
 
           {/* Quick Metrics Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 min-w-[220px]">
             <div className="glass-card p-3 rounded-xl border border-white/5 text-center">
               <div className="text-[10px] text-slate-400">总发车班次</div>
               <div className="text-lg font-extrabold text-slate-100">{batches.length}</div>
@@ -205,16 +211,6 @@ export const AdminPanel: React.FC = () => {
             <div className="glass-card p-3 rounded-xl border border-emerald-500/20 text-center bg-emerald-500/5">
               <div className="text-[10px] text-emerald-400 font-medium">进行中车次</div>
               <div className="text-lg font-extrabold text-emerald-300">{totalActive}</div>
-            </div>
-            <div className="glass-card p-3 rounded-xl border border-blue-500/20 text-center bg-blue-500/5">
-              <div className="text-[10px] text-blue-400 font-medium">累计招募率</div>
-              <div className="text-lg font-extrabold text-blue-300">
-                {totalRecruiting > 0 ? Math.round((totalBooked / totalRecruiting) * 100) : 0}%
-              </div>
-            </div>
-            <div className="glass-card p-3 rounded-xl border border-rose-500/20 text-center bg-rose-500/5">
-              <div className="text-[10px] text-rose-400 font-medium">已作废班次</div>
-              <div className="text-lg font-extrabold text-rose-300">{totalInvalid}</div>
             </div>
           </div>
         </div>
@@ -239,186 +235,119 @@ export const AdminPanel: React.FC = () => {
 
             <form onSubmit={handleCreateBatch} className="space-y-4 text-xs">
               {/* Row 1: Date & Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                    <span>发车日期</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono"
-                  />
-                </div>
+              <ConfigProvider theme={pickerTheme}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                      <span>发车日期</span>
+                    </label>
+                    <DatePicker
+                      className="w-full glass-input text-slate-100 text-xs font-mono h-9"
+                      value={formData.date ? dayjs(formData.date, 'YYYY-MM-DD') : null}
+                      onChange={(_, dateString) => {
+                        if (!dateString) return;
+                        const val = Array.isArray(dateString) ? dateString[0] : dateString;
+                        if (val) setFormData({ ...formData, date: val });
+                      }}
+                      placeholder="选择发车日期"
+                      format="YYYY-MM-DD"
+                      allowClear={false}
+                    />
+                  </div>
 
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>发车时间</span>
-                  </label>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>发车时间</span>
+                    </label>
+                    <TimePicker
+                      className="w-full glass-input text-slate-100 text-xs font-mono h-9"
+                      value={formData.time ? dayjs(formData.time, 'HH:mm:ss') : null}
+                      onChange={(_, timeString) => {
+                        if (!timeString) return;
+                        const val = Array.isArray(timeString) ? timeString[0] : timeString;
+                        if (val) setFormData({ ...formData, time: val });
+                      }}
+                      placeholder="选择发车时间"
+                      format="HH:mm:ss"
+                      allowClear={false}
+                    />
+                  </div>
+                </div>
+              </ConfigProvider>
+
+              {/* Row 2: Target Score */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-amber-400" />
+                    <span>排行榜目标积分</span>
+                  </span>
+                  <span className="text-[10px] text-amber-400 font-mono">默认 66 分</span>
+                </label>
+                <div className="relative">
                   <input
-                    type="time"
-                    step="1"
+                    type="number"
                     required
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono"
+                    min={1}
+                    max={999}
+                    value={formData.targetScore}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        targetScore: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono pr-8"
                   />
+                  <span className="absolute right-3 top-2.5 text-[10px] text-slate-400">分</span>
                 </div>
               </div>
 
-              {/* Row 2: Target Score & Capacity (Defaults: 106分 & 200人) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5 text-amber-400" />
-                      <span>目标积分</span>
-                    </span>
-                    <span className="text-[10px] text-amber-400 font-mono">默认 106 分</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      required
-                      min={1}
-                      max={999}
-                      value={formData.targetScore}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          targetScore: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono pr-8"
-                    />
-                    <span className="absolute right-3 top-2.5 text-[10px] text-slate-400">分</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-purple-400" />
-                      <span>招募名额</span>
-                    </span>
-                    <span className="text-[10px] text-purple-400 font-mono">默认 200 人</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      required
-                      min={1}
-                      max={1000}
-                      value={formData.maxCapacity}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          maxCapacity: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono pr-8"
-                    />
-                    <span className="absolute right-3 top-2.5 text-[10px] text-slate-400">人</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Row 3: Unified Avatar Selection & Custom URL */}
+              {/* Row 3: Unified Avatar Selection */}
               <div className="space-y-2 pt-1">
-                <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                  <ImageIcon className="w-3.5 h-3.5 text-teal-400" />
-                  <span>统一头像指示图 URL</span>
-                </label>
-
-                {/* Preset Avatars Bar */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {PRESET_AVATARS.map((item) => (
-                    <button
-                      key={item.name}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, avatarUrl: item.url })}
-                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] transition-all flex-shrink-0 ${
-                        formData.avatarUrl === item.url
-                          ? 'bg-teal-500/20 border-teal-400 text-teal-300 font-bold'
-                          : 'bg-slate-900/40 border-white/10 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {/* eslint-disable-next-html-element-suppression */}
-                      <img
-                        src={item.url}
-                        alt={item.name}
-                        className="w-4 h-4 rounded-full object-cover"
-                      />
-                      <span>{item.name}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="url"
-                    required
-                    value={formData.avatarUrl}
-                    onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                    placeholder="请输入头像图片链接 (https://...)"
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono"
-                  />
+                <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-teal-400" />
+                    <span>选择战队统一特工头像</span>
+                  </span>
                   {formData.avatarUrl && (
-                    <div className="w-9 h-9 rounded-xl border border-white/20 overflow-hidden flex-shrink-0 bg-slate-950">
-                      {/* eslint-disable-next-html-element-suppression */}
-                      <img
-                        src={formData.avatarUrl}
-                        alt="Avatar Preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = 'none';
-                        }}
-                      />
-                    </div>
+                    <span className="text-[10px] text-teal-300 font-mono">已选中头像</span>
                   )}
-                </div>
-              </div>
-
-              {/* Row 4: WeChat Group QR Code */}
-              <div className="space-y-2">
-                <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
-                  <QrCode className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>微信群二维码 URL</span>
                 </label>
 
-                {/* Preset QR options */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {PRESET_QRS.map((qr) => (
-                    <button
-                      key={qr.label}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, qrCodeUrl: qr.url })}
-                      className={`px-2 py-1 rounded-lg border text-[10px] transition-all flex-shrink-0 ${
-                        formData.qrCodeUrl === qr.url
-                          ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold'
-                          : 'bg-slate-900/40 border-white/10 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {qr.label}
-                    </button>
-                  ))}
+                {/* Preset Avatars Grid */}
+                <div className="grid grid-cols-4 gap-2">
+                  {PRESET_AVATARS.map((item) => {
+                    const isSelected = formData.avatarUrl === item.url;
+                    return (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, avatarUrl: item.url })}
+                        className={`flex flex-col items-center p-1.5 rounded-xl border transition-all ${
+                          isSelected
+                            ? 'bg-teal-500/20 border-teal-400 ring-2 ring-teal-500/30 scale-105'
+                            : 'bg-slate-900/50 border-white/10 hover:border-slate-500 opacity-75 hover:opacity-100'
+                        }`}
+                      >
+                        {/* eslint-disable-next-html-element-suppression */}
+                        <img
+                          src={item.url}
+                          alt={item.name}
+                          className="w-8 h-8 rounded-lg object-cover"
+                        />
+                        <span className="text-[10px] text-slate-300 mt-1 truncate w-full text-center">
+                          {item.name}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-
-                <input
-                  type="url"
-                  required
-                  value={formData.qrCodeUrl}
-                  onChange={(e) => setFormData({ ...formData, qrCodeUrl: e.target.value })}
-                  placeholder="微信群二维码图片链接"
-                  className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono"
-                />
               </div>
 
-              {/* Row 5: Shift Announcement */}
+              {/* Row 4: Shift Announcement */}
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
                   <Megaphone className="w-3.5 h-3.5 text-blue-400" />
@@ -426,10 +355,9 @@ export const AdminPanel: React.FC = () => {
                 </label>
                 <textarea
                   rows={3}
-                  required
                   value={formData.notice}
                   onChange={(e) => setFormData({ ...formData, notice: e.target.value })}
-                  placeholder="请输入针对该班次玩家的打分要求与战队规范..."
+                  placeholder="可选：可在此填写班次入场说明与规则..."
                   className="w-full glass-input p-3 rounded-xl text-slate-100 text-xs leading-relaxed"
                 />
               </div>
@@ -511,11 +439,6 @@ export const AdminPanel: React.FC = () => {
               /* Batch Cards List */
               <div className="space-y-4">
                 {filteredBatches.map((batch) => {
-                  const capacityPercent = Math.min(
-                    100,
-                    Math.round((batch.currentCount / batch.maxCapacity) * 100)
-                  );
-
                   return (
                     <div
                       key={batch.id}
@@ -566,8 +489,8 @@ export const AdminPanel: React.FC = () => {
 
                       {/* Main Card Content */}
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                        {/* Avatar & QR Thumbnails */}
-                        <div className="sm:col-span-4 flex items-center gap-3">
+                        {/* Avatar Thumbnail */}
+                        <div className="sm:col-span-3 flex items-center gap-3">
                           <div className="flex flex-col items-center">
                             {/* eslint-disable-next-html-element-suppression */}
                             <img
@@ -577,45 +500,20 @@ export const AdminPanel: React.FC = () => {
                             />
                             <span className="text-[9px] text-slate-400 mt-1">统一头像</span>
                           </div>
-
-                          <div className="flex flex-col items-center">
-                            {/* eslint-disable-next-html-element-suppression */}
-                            <img
-                              src={batch.qrCodeUrl}
-                              alt="QR Code"
-                              className="w-12 h-12 rounded-xl object-cover border border-blue-500/40 shadow-md bg-white p-0.5"
-                            />
-                            <span className="text-[9px] text-slate-400 mt-1">微信群码</span>
-                          </div>
                         </div>
 
-                        {/* Details & Capacity Progress */}
-                        <div className="sm:col-span-8 space-y-2 text-xs">
+                        {/* Details & Notice */}
+                        <div className="sm:col-span-9 space-y-2 text-xs">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-amber-300 flex items-center gap-1">
                               <Target className="w-3.5 h-3.5 text-amber-400" />
-                              目标积分: {batch.targetScore} 分
+                              排行榜目标: {batch.targetScore} 分
                             </span>
-                            <span className="text-[11px] text-slate-400 font-mono">
-                              已招募: <strong className="text-slate-100">{batch.currentCount}</strong> / {batch.maxCapacity} 人
-                            </span>
-                          </div>
-
-                          {/* Capacity Progress Bar */}
-                          <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-white/5">
-                            <div
-                              className={`h-full transition-all duration-500 ${
-                                capacityPercent >= 90
-                                  ? 'bg-gradient-to-r from-amber-500 to-rose-500'
-                                  : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                              }`}
-                              style={{ width: `${capacityPercent}%` }}
-                            />
                           </div>
 
                           {/* Notice snippet */}
                           <p className="text-[11px] text-slate-300 line-clamp-2 bg-slate-950/40 p-2 rounded-lg border border-white/5 leading-relaxed">
-                            {batch.notice}
+                            {batch.notice || '未填写公告'}
                           </p>
                         </div>
                       </div>
@@ -719,77 +617,52 @@ export const AdminPanel: React.FC = () => {
             </div>
 
             <form onSubmit={handleUpdateSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] text-slate-300 font-semibold mb-1 block">发车日期</label>
-                  <input
-                    type="date"
-                    required
-                    value={editingBatch.date}
-                    onChange={(e) =>
-                      setEditingBatch({ ...editingBatch, date: e.target.value })
-                    }
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono"
-                  />
+              <ConfigProvider theme={pickerTheme}>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] text-slate-300 font-semibold mb-1 block">发车日期</label>
+                    <DatePicker
+                      className="w-full glass-input text-slate-100 font-mono text-xs h-9"
+                      value={editingBatch.date ? dayjs(editingBatch.date, 'YYYY-MM-DD') : null}
+                      onChange={(_, dateString) => {
+                        if (!dateString) return;
+                        const val = Array.isArray(dateString) ? dateString[0] : dateString;
+                        if (val) setEditingBatch({ ...editingBatch, date: val });
+                      }}
+                      placeholder="选择发车日期"
+                      format="YYYY-MM-DD"
+                      allowClear={false}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-slate-300 font-semibold mb-1 block">发车时间</label>
+                    <TimePicker
+                      className="w-full glass-input text-slate-100 font-mono text-xs h-9"
+                      value={editingBatch.time ? dayjs(editingBatch.time, 'HH:mm:ss') : null}
+                      onChange={(_, timeString) => {
+                        if (!timeString) return;
+                        const val = Array.isArray(timeString) ? timeString[0] : timeString;
+                        if (val) setEditingBatch({ ...editingBatch, time: val });
+                      }}
+                      placeholder="选择发车时间"
+                      format="HH:mm:ss"
+                      allowClear={false}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-[11px] text-slate-300 font-semibold mb-1 block">发车时间</label>
-                  <input
-                    type="time"
-                    step="1"
-                    required
-                    value={editingBatch.time}
-                    onChange={(e) =>
-                      setEditingBatch({ ...editingBatch, time: e.target.value })
-                    }
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] text-slate-300 font-semibold mb-1 block">目标积分</label>
-                  <input
-                    type="number"
-                    required
-                    value={editingBatch.targetScore}
-                    onChange={(e) =>
-                      setEditingBatch({
-                        ...editingBatch,
-                        targetScore: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] text-slate-300 font-semibold mb-1 block">招募名额</label>
-                  <input
-                    type="number"
-                    required
-                    value={editingBatch.maxCapacity}
-                    onChange={(e) =>
-                      setEditingBatch({
-                        ...editingBatch,
-                        maxCapacity: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono"
-                  />
-                </div>
-              </div>
+              </ConfigProvider>
 
               <div>
-                <label className="text-[11px] text-slate-300 font-semibold mb-1 block">
-                  统一头像指示图 URL
-                </label>
+                <label className="text-[11px] text-slate-300 font-semibold mb-1 block">排行榜目标积分</label>
                 <input
-                  type="url"
+                  type="number"
                   required
-                  value={editingBatch.avatarUrl}
+                  value={editingBatch.targetScore}
                   onChange={(e) =>
-                    setEditingBatch({ ...editingBatch, avatarUrl: e.target.value })
+                    setEditingBatch({
+                      ...editingBatch,
+                      targetScore: parseInt(e.target.value) || 0,
+                    })
                   }
                   className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono"
                 />
@@ -797,16 +670,15 @@ export const AdminPanel: React.FC = () => {
 
               <div>
                 <label className="text-[11px] text-slate-300 font-semibold mb-1 block">
-                  微信群二维码 URL
+                  统一头像图片 URL
                 </label>
                 <input
-                  type="url"
-                  required
-                  value={editingBatch.qrCodeUrl}
+                  type="text"
+                  value={editingBatch.avatarUrl}
                   onChange={(e) =>
-                    setEditingBatch({ ...editingBatch, qrCodeUrl: e.target.value })
+                    setEditingBatch({ ...editingBatch, avatarUrl: e.target.value })
                   }
-                  className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono"
+                  className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono text-xs"
                 />
               </div>
 
@@ -816,12 +688,11 @@ export const AdminPanel: React.FC = () => {
                 </label>
                 <textarea
                   rows={3}
-                  required
                   value={editingBatch.notice}
                   onChange={(e) =>
                     setEditingBatch({ ...editingBatch, notice: e.target.value })
                   }
-                  className="w-full glass-input p-3 rounded-xl text-slate-100 leading-relaxed"
+                  className="w-full glass-input p-3 rounded-xl text-slate-100 leading-relaxed text-xs"
                 />
               </div>
 

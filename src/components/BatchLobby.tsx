@@ -3,87 +3,33 @@
 import React, { useState, useEffect } from 'react';
 import {
   Clock,
-  Lock,
-  Users,
-  CheckCircle2,
-  AlertCircle,
-  QrCode,
   Sparkles,
   Info,
   Calendar,
   Target,
   ShieldAlert,
-  LogIn,
-  Search,
   Filter,
-  ArrowRight,
-  UserCheck,
-  X,
-  Radio,
   Flame,
-  Award,
+  Gamepad2,
   ChevronRight,
+  X,
+  CheckCircle2,
 } from 'lucide-react';
 import { useStore, Batch } from '../store/useStore';
-import { AuthModal } from './AuthModal';
 
 export interface BatchLobbyProps {
   onEnterCabin?: (batchId: string) => void;
 }
 
-// Sample mock roster players for detailed player info display
-const MOCK_ROSTER_PLAYERS = [
-  {
-    openId: 'wx_mock_01',
-    wechatName: '特工队长阿猫',
-    gameNickname: '极速发车-阿猫',
-    gameId: '9582014',
-    avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
-    bookedAt: Date.now() - 1000 * 60 * 12,
-    role: '队长/发车人',
-  },
-  {
-    openId: 'wx_mock_02',
-    wechatName: '战力担当科考',
-    gameNickname: '特工科考神杀',
-    gameId: '9582018',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    bookedAt: Date.now() - 1000 * 60 * 8,
-    role: '核心打手',
-  },
-  {
-    openId: 'wx_mock_03',
-    wechatName: '大师杨猫',
-    gameNickname: '大师-无敌猫咪',
-    gameId: '9582022',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
-    bookedAt: Date.now() - 1000 * 60 * 5,
-    role: '队友',
-  },
-  {
-    openId: 'wx_mock_04',
-    wechatName: '金特工小王',
-    gameNickname: '黄金特工宝',
-    gameId: '9582099',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    bookedAt: Date.now() - 1000 * 60 * 2,
-    role: '队友',
-  },
-];
-
 export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
-  const { user, batches, bookings, bookBatch } = useStore();
+  const { batches } = useStore();
 
-  // Timer refresh ticker (updates state every 1 sec to refresh remaining cooldown countdown)
+  // Timer refresh ticker (updates state every 1 sec to refresh remaining countdown)
   const [now, setNow] = useState<number>(Date.now());
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [selectedRosterBatch, setSelectedRosterBatch] = useState<Batch | null>(null);
-  const [selectedQrBatch, setSelectedQrBatch] = useState<Batch | null>(null);
-  const [filter, setFilter] = useState<'all' | 'active' | 'my'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<'today' | 'history'>('today');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Set up 1-second interval to update remaining seconds live
+  // Set up 1-second interval to update live countdown
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(Date.now());
@@ -99,67 +45,49 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
     }, 3500);
   };
 
-  // Get current user's booking info
-  const userBooking = user ? bookings[user.openId] : null;
-
-  // Calculate cooldown state for current user
-  const getUserCooldownInfo = () => {
-    if (!userBooking) return { isBooked: false, secondsLeft: 0, isLocked: false };
-    const bookedAt = userBooking.bookedAt || now;
-    const elapsedSeconds = Math.floor((now - bookedAt) / 1000);
-    const secondsLeft = Math.max(0, 180 - elapsedSeconds);
-    return {
-      isBooked: true,
-      batchId: userBooking.batchId,
-      secondsLeft,
-      isCooldown: secondsLeft > 0,
-      isLocked: true, // Hard lock remains active both during and after cooldown
-    };
+  // Copy notice to clipboard
+  const handleCopyNotice = (noticeText: string, batchId: string) => {
+    if (noticeText) {
+      navigator.clipboard.writeText(noticeText);
+      showToast(`📋 已复制班次 [${batchId}] 战术公告至剪贴板`);
+    }
   };
 
-  const cooldownInfo = getUserCooldownInfo();
+  // Helper to format countdown timer for each batch
+  const getCountdownString = (dateStr: string, timeStr: string) => {
+    try {
+      const normalizedTime = timeStr.trim().split(':').length === 2 ? `${timeStr.trim()}:00` : timeStr.trim();
+      const targetTime = new Date(`${dateStr.trim()}T${normalizedTime}`).getTime();
 
-  // Reservation click handler
-  const handleReserve = (batch: Batch) => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-
-    if (batch.status === 'invalid') {
-      showToast('⚠️ 该班次当前处于失效/暂停状态，无法预约');
-      return;
-    }
-
-    if (userBooking) {
-      if (userBooking.batchId === batch.id) {
-        showToast('ℹ️ 你已预约此班次');
-      } else {
-        showToast('⚠️ 每位玩家同一时间只能预约一个发车班次，请勿重复预约');
+      if (isNaN(targetTime)) {
+        return { isExpired: false, text: '时间待定' };
       }
-      return;
-    }
 
-    bookBatch(user.openId, batch.id);
-    showToast(`🎉 预约成功！3 分钟 (180 秒) 实时冷静锁已启动`);
-  };
+      const diffMs = targetTime - now;
 
-  // Handle attempt to cancel / modify reservation
-  const handleCancelClick = () => {
-    if (!cooldownInfo.isBooked) return;
-    if (cooldownInfo.isCooldown) {
-      showToast(`🔒 预约锁死中 (冷静期还剩 ${cooldownInfo.secondsLeft} 秒)，期间严格禁止任何退改撤销操作！`);
-    } else {
-      showToast(`🔒 3 分钟冷静期已结束，班次维持硬锁定状态。如需变更请联系班次发起人！`);
+      if (diffMs <= 0) {
+        return { isExpired: true, text: '已到发车时间' };
+      }
+
+      const totalSecs = Math.floor(diffMs / 1000);
+      const days = Math.floor(totalSecs / 86400);
+      const hours = Math.floor((totalSecs % 86400) / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+
+      const pad = (num: number) => String(num).padStart(2, '0');
+
+      if (days > 0) {
+        return { isExpired: false, text: `${days}天 ${pad(hours)}:${pad(mins)}:${pad(secs)}` };
+      }
+      return { isExpired: false, text: `${pad(hours)}:${pad(mins)}:${pad(secs)}` };
+    } catch {
+      return { isExpired: false, text: '计算中...' };
     }
   };
 
   // Handle entering cabin
   const handleEnterCabinClick = (batchId: string) => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
     if (onEnterCabin) {
       onEnterCabin(batchId);
     } else {
@@ -167,16 +95,16 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
     }
   };
 
+  const todayStr = new Date(now).toISOString().split('T')[0];
+
   // Filtered batch list
   const filteredBatches = batches.filter((b) => {
-    if (filter === 'active' && b.status !== 'active') return false;
-    if (filter === 'my' && (!userBooking || userBooking.batchId !== b.id)) return false;
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      const matchNotice = b.notice.toLowerCase().includes(term);
-      const matchTime = b.time.includes(term);
-      const matchDate = b.date.includes(term);
-      return matchNotice || matchTime || matchDate;
+    const { isExpired } = getCountdownString(b.date, b.time);
+    if (filter === 'today') {
+      return b.date >= todayStr && !isExpired;
+    }
+    if (filter === 'history') {
+      return b.date < todayStr || isExpired;
     }
     return true;
   });
@@ -204,524 +132,279 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
         <div className="absolute -top-16 -right-16 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-              <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-400" />
-              <span>实时并行发车大厅</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <span>每日发车班次大厅</span>
-              <span className="text-xs font-normal px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                严格预约锁死
-              </span>
+        <div className="flex items-center justify-between gap-6 relative z-10">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+              并列发车大厅
             </h2>
-            <p className="text-xs md:text-sm text-slate-400 max-w-xl">
-              选择适合的攻防发车班次，准时卡点打满 106 分。预约后享 3 分钟 (180 秒) 实时冷静锁保护，期满后维持硬锁定。
+          </div>
+
+          {/* Key Stat Card: Total Batches Only */}
+          <div className="shrink-0">
+            <div className="glass-card px-6 py-3.5 rounded-xl border border-white/10 text-center min-w-[130px]">
+              <div className="text-xs text-slate-400 flex items-center justify-center gap-1.5 mb-1">
+                <Calendar className="w-4 h-4 text-emerald-400" />
+                <span className="font-semibold">总班次数</span>
+              </div>
+              <div className="text-2xl md:text-3xl font-black text-emerald-400 font-mono">
+                {batches.length}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2-Column Layout Container (Left 3 cols, Right 9 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: 并列活动玩法 (lg:col-span-3) */}
+        <div className="lg:col-span-3 glass-panel rounded-2xl p-4.5 border border-white/10 space-y-3.5">
+          {/* Section Header */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <Gamepad2 className="w-4 h-4" />
+              </div>
+              <h3 className="font-extrabold text-xs text-white tracking-tight">并列活动玩法指南</h3>
+            </div>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
+              稳拿第一
+            </span>
+          </div>
+
+          {/* Core Principle Card */}
+          <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-500/20 text-xs space-y-1">
+            <div className="flex items-center gap-1.5 font-extrabold text-amber-300">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>核心机制：同分共享第 1 名</span>
+            </div>
+            <p className="text-slate-300 leading-relaxed text-[10.5px]">
+              组内 5 人保持相同目标分数，实现<strong className="text-emerald-400 font-bold">全员并列第 1 名</strong>！5天活动最高可拿 <strong className="text-amber-300 font-bold">4 个金配件/金宠物</strong>。
             </p>
           </div>
 
-          {/* Key Stat Cards */}
-          <div className="grid grid-cols-3 gap-3 md:gap-4 shrink-0">
-            <div className="glass-card p-3 md:p-4 rounded-xl border border-white/10 text-center">
-              <div className="text-xs text-slate-400 flex items-center justify-center gap-1 mb-1">
-                <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                <span>总班次数</span>
-              </div>
-              <div className="text-xl md:text-2xl font-black text-white">{batches.length}</div>
-            </div>
+          {/* 5-Step Process */}
+          <div className="space-y-2">
+            <h4 className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span>通关 5 步流程：</span>
+            </h4>
 
-            <div className="glass-card p-3 md:p-4 rounded-xl border border-white/10 text-center">
-              <div className="text-xs text-slate-400 flex items-center justify-center gap-1 mb-1">
-                <Users className="w-3.5 h-3.5 text-emerald-400" />
-                <span>总上车特工</span>
-              </div>
-              <div className="text-xl md:text-2xl font-black text-emerald-400">
-                {batches.reduce((sum, b) => sum + b.currentCount, 0)}
-              </div>
-            </div>
-
-            <div className="glass-card p-3 md:p-4 rounded-xl border border-white/10 text-center">
-              <div className="text-xs text-slate-400 flex items-center justify-center gap-1 mb-1">
-                <Target className="w-3.5 h-3.5 text-amber-400" />
-                <span>目标分数</span>
-              </div>
-              <div className="text-xl md:text-2xl font-black text-amber-300">106分</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Global User Lock Status Banner */}
-        {cooldownInfo.isBooked && (
-          <div className="mt-6 p-4 rounded-xl bg-slate-900/80 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                <Lock className="w-5 h-5 animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white">
-                    你已成功预约班次：[{cooldownInfo.batchId}]
-                  </span>
-                  {cooldownInfo.isCooldown ? (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
-                      🔒 预约锁死中 (冷静期还剩 {cooldownInfo.secondsLeft} 秒)
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                      🔒 已硬锁定 (冷静期已结束)
-                    </span>
-                  )}
+            <div className="space-y-1 text-xs">
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
+                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  1
+                </span>
+                <div>
+                  <div className="font-bold text-slate-200 text-[10.5px]">首日停分下线</div>
+                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                    第 1 天打到目标分（如 66 分），<strong className="text-amber-300 font-normal">24点前必须下线</strong>。
+                  </p>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {cooldownInfo.isCooldown
-                    ? `冷静期内严格禁止任何退改撤销操作 (${cooldownInfo.secondsLeft}s 倒计时中)`
-                    : '已完成冷静期锁定，保持班次阵型稳定，等待发车信号。'}
-                </p>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
+                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  2
+                </span>
+                <div>
+                  <div className="font-bold text-slate-200 text-[10.5px]">精确秒级上线</div>
+                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                    第 2 天看群通知，配合“悬浮时钟”<strong className="text-emerald-300 font-normal">精确到秒同步上线</strong>。
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
+                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  3
+                </span>
+                <div>
+                  <div className="font-bold text-slate-200 text-[10.5px]">同组 5 人建群</div>
+                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                    匹配成功后 5 人拉小群，沟通约定<strong className="text-amber-300 font-normal">统一锁定分数不再增加</strong>。
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
+                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  4
+                </span>
+                <div>
+                  <div className="font-bold text-slate-200 text-[10.5px]">全程保持同分</div>
+                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                    后续几天继续保持同分锁榜，共同霸榜第一名。
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
+                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                  5
+                </span>
+                <div>
+                  <div className="font-bold text-slate-200 text-[10.5px]">终局并列拿满</div>
+                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                    最后一天定好目标分齐步走，全员满额领奖！
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-              <button
-                onClick={handleCancelClick}
-                className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-semibold flex-1 sm:flex-initial transition-colors cursor-not-allowed"
-                title="处于硬锁定及冷静保护期，无法撤销"
-              >
-                🔒 禁止退改撤销
-              </button>
-
-              <button
-                onClick={() => handleEnterCabinClick(cooldownInfo.batchId!)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
-              >
-                🚗 进入发车车厢
-              </button>
+          {/* Quick Notice Section */}
+          <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1 text-[10.5px]">
+            <div className="font-bold text-amber-300 flex items-center gap-1">
+              <span>‼️ 进群必备规则</span>
             </div>
+            <ul className="text-slate-300 space-y-0.5 text-[9.5px] list-disc list-inside leading-relaxed">
+              <li>更换游戏内指定老板头像</li>
+              <li>群昵称与游戏内昵称保持一致</li>
+              <li>进群发送 66/106 进度截图标记</li>
+              <li>iOS/安卓准备好“悬浮时钟”精准发车</li>
+            </ul>
           </div>
-        )}
-      </div>
-
-      {/* Filter and Search Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/60 border border-white/10 text-xs font-medium w-full sm:w-auto">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
-              filter === 'all'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Filter className="w-3.5 h-3.5" />
-            <span>全部班次 ({batches.length})</span>
-          </button>
-          <button
-            onClick={() => setFilter('active')}
-            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
-              filter === 'active'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>发车中班次</span>
-          </button>
-          <button
-            onClick={() => setFilter('my')}
-            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
-              filter === 'my'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <UserCheck className="w-3.5 h-3.5 text-blue-400" />
-            <span>我的预约</span>
-          </button>
         </div>
 
-        {/* Search input */}
-        <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="搜索班次、时间或指令..."
-            className="w-full glass-input pl-9 pr-3 py-2 rounded-xl text-xs placeholder-slate-500"
-          />
-        </div>
-      </div>
-
-      {/* Batches Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredBatches.length === 0 ? (
-          <div className="col-span-full glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
-            <Info className="w-8 h-8 text-slate-500 mx-auto" />
-            <p className="text-sm font-semibold">暂无符合条件的发车班次</p>
-            <p className="text-xs text-slate-500">请更改筛选条件或等待创作者发布最新发车班次。</p>
-          </div>
-        ) : (
-          filteredBatches.map((batch) => {
-            const isUserBookedThis = cooldownInfo.isBooked && cooldownInfo.batchId === batch.id;
-            const isFull = batch.currentCount >= batch.maxCapacity;
-            const isInvalid = batch.status === 'invalid';
-            const progressPercent = Math.min(100, Math.round((batch.currentCount / batch.maxCapacity) * 100));
-
-            return (
-              <div
-                key={batch.id}
-                className={`glass-card rounded-2xl p-6 transition-all duration-300 border relative overflow-hidden flex flex-col justify-between ${
-                  isUserBookedThis
-                    ? 'border-emerald-500/50 bg-emerald-950/20 shadow-xl shadow-emerald-500/10'
-                    : isInvalid
-                    ? 'border-rose-500/20 bg-rose-950/10 opacity-75'
-                    : 'border-white/10 hover:border-slate-500/40 hover:shadow-lg'
+        {/* Right Column: 发车班次列表 (lg:col-span-9) */}
+        <div className="lg:col-span-9 space-y-4">
+          {/* Filter Tabs (Only 2 Tabs: 今日班次 & 历史班次) */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-white/10 text-xs font-medium">
+              <button
+                onClick={() => setFilter('today')}
+                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
+                  filter === 'today'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                {/* Status Badges Header */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      {/* eslint-disable-next-html-element-suppression */}
-                      <img
-                        src={batch.avatarUrl}
-                        alt="班次头像"
-                        className="w-12 h-12 rounded-xl object-cover border border-white/20 shadow-md"
-                      />
-                      {isUserBookedThis && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 text-slate-950 rounded-full flex items-center justify-center shadow-md">
-                          <CheckCircle2 className="w-3.5 h-3.5 font-bold" />
-                        </div>
-                      )}
-                    </div>
+                <Flame className="w-3.5 h-3.5 text-amber-400" />
+                <span>今日班次</span>
+              </button>
 
+              <button
+                onClick={() => setFilter('history')}
+                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
+                  filter === 'history'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5 text-blue-400" />
+                <span>历史班次</span>
+              </button>
+            </div>
+
+            <span className="text-xs text-slate-400 hidden sm:inline">
+              共找到 <strong className="text-emerald-400">{filteredBatches.length}</strong> 个班次
+            </span>
+          </div>
+
+          {/* Batches Grid (3-Column Grid) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filteredBatches.length === 0 ? (
+              <div className="col-span-full glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
+                <Info className="w-8 h-8 text-slate-500 mx-auto" />
+                <p className="text-sm font-semibold">暂无符合条件的发车班次</p>
+                <p className="text-xs text-slate-500">请更改筛选条件或等待发布最新班次。</p>
+              </div>
+            ) : (
+              filteredBatches.map((batch) => {
+                const isInvalid = batch.status === 'invalid';
+                const countdown = getCountdownString(batch.date, batch.time);
+                const isHistorical = batch.date < todayStr;
+
+                return (
+                  <div
+                    key={batch.id}
+                    className={`glass-card rounded-2xl p-5 transition-all duration-300 border relative overflow-hidden flex flex-col justify-between group ${
+                      isInvalid
+                        ? 'border-rose-500/20 bg-rose-950/10 opacity-75'
+                        : isHistorical
+                        ? 'border-white/5 bg-slate-950/40 opacity-85'
+                        : 'border-white/10 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/5'
+                    }`}
+                  >
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-base text-white tracking-tight">
-                          {batch.time} 发车班次
+                      {/* Top Row: 排行榜进度 66 Badge Only (Right status badge removed) */}
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-emerald-500/20 border border-amber-500/40 text-amber-300 text-xs font-black tracking-tight flex items-center gap-1.5 shadow-sm">
+                          <Target className="w-3.5 h-3.5 text-amber-400" />
+                          <span>排行榜进度 {batch.targetScore}</span>
                         </span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-white/10">
-                          {batch.id}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                        <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                        <span>日期: {batch.date}</span>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Right Status Pill */}
-                  <div>
-                    {isInvalid ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300 flex items-center gap-1">
-                        <ShieldAlert className="w-3.5 h-3.5" /> 已失效
-                      </span>
-                    ) : isUserBookedThis ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center gap-1">
-                        <Lock className="w-3.5 h-3.5" /> 已预约锁死
-                      </span>
-                    ) : isFull ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" /> 已满员
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/20 border border-blue-500/40 text-blue-300 flex items-center gap-1">
-                        <Flame className="w-3.5 h-3.5" /> 招募中
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Batch Announcement / Instructions */}
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 mb-4 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                    <span className="flex items-center gap-1.5 text-emerald-400">
-                      <Sparkles className="w-3.5 h-3.5" /> 创作者班次指令/公告
-                    </span>
-                    <span className="text-amber-300 flex items-center gap-1">
-                      <Target className="w-3.5 h-3.5" /> 目标: {batch.targetScore} 分停手
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                    {batch.notice}
-                  </p>
-                </div>
-
-                {/* Capacity Progress Bar & Detailed Player Info Trigger */}
-                <div className="space-y-2 mb-5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400 flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-slate-300" />
-                      当前班次容量
-                    </span>
-                    <span className="font-mono font-bold text-white">
-                      <span className="text-emerald-400">{batch.currentCount}</span> / {batch.maxCapacity} 人 ({progressPercent}%)
-                    </span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden border border-white/5">
-                    <div
-                      className={`h-full transition-all duration-500 rounded-full ${
-                        progressPercent >= 100
-                          ? 'bg-amber-400'
-                          : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                      }`}
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-
-                  {/* Trigger to view detailed player roster */}
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      onClick={() => setSelectedRosterBatch(batch)}
-                      className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors"
-                    >
-                      <Users className="w-3.5 h-3.5" />
-                      <span>查看明细玩家列表 (头像/昵称/ID)</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-
-                    <button
-                      onClick={() => setSelectedQrBatch(batch)}
-                      className="text-xs text-slate-400 hover:text-white font-medium flex items-center gap-1 transition-colors"
-                    >
-                      <QrCode className="w-3.5 h-3.5 text-purple-400" />
-                      <span>查看发车二维码</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="pt-3 border-t border-white/10 flex items-center gap-3">
-                  {isUserBookedThis ? (
-                    <div className="w-full flex items-center gap-2">
-                      <button
-                        onClick={handleCancelClick}
-                        className="px-3 py-2.5 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold border border-white/10 hover:bg-slate-700 hover:text-white transition-colors flex items-center justify-center gap-1 cursor-not-allowed"
-                        title="冷静期及硬锁定保护中"
-                      >
-                        <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        <span>退改锁死</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleEnterCabinClick(batch.id)}
-                        className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group"
-                      >
-                        <span>🚗 进入发车车厢</span>
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-full flex items-center gap-2">
-                      <button
-                        onClick={() => handleReserve(batch)}
-                        disabled={isFull || isInvalid || cooldownInfo.isBooked}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                          isInvalid || isFull || cooldownInfo.isBooked
-                            ? 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
-                            : 'bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 shadow-md'
-                        }`}
-                      >
-                        {cooldownInfo.isBooked ? (
-                          <>
-                            <Lock className="w-3.5 h-3.5" /> 已预约其他班次
-                          </>
-                        ) : isFull ? (
-                          <>
-                            <Users className="w-3.5 h-3.5" /> 班次已满
-                          </>
-                        ) : isInvalid ? (
-                          <>
-                            <ShieldAlert className="w-3.5 h-3.5" /> 班次失效
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="w-3.5 h-3.5" /> 预约本班次 (3分钟冷静锁)
-                          </>
+                        {isInvalid && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300 flex items-center gap-1">
+                            <ShieldAlert className="w-3 h-3" /> 已失效
+                          </span>
                         )}
-                      </button>
+                      </div>
 
+                      {/* HERO BANNER: Departure Time + Giant Countdown */}
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-white/10 mb-3 space-y-2.5 relative overflow-hidden text-center">
+                        <span className="text-[10px] text-emerald-400/90 font-bold uppercase tracking-wider block">
+                          实时发车倒计时
+                        </span>
+                        <div className="text-2xl md:text-3xl font-black font-mono tracking-tight text-emerald-300 group-hover:text-emerald-200 transition-colors">
+                          {countdown.text}
+                        </div>
+                      </div>
+
+                      {/* Prominent Single-Line Info Bar: Time, Date & Car ID (No line wraps!) */}
+                      <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 mb-3 text-[11px] font-mono space-y-1">
+                        <div className="flex items-center justify-between font-bold text-slate-200">
+                          <span className="text-emerald-400 flex items-center gap-1">
+                            🚀 {batch.time} 发车
+                          </span>
+                          <span className="text-slate-400 flex items-center gap-1">
+                            📅 {batch.date}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate pt-0.5 border-t border-white/5 flex items-center justify-between">
+                          <span>车号:</span>
+                          <span className="font-bold text-slate-300">{batch.id}</span>
+                        </div>
+                      </div>
+
+                      {/* Batch Notice Section with Copy Button */}
+                      <div className="p-3 rounded-xl bg-slate-900/40 border border-white/5 mb-4 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                            📢 班次战术公告
+                          </span>
+                          {batch.notice && (
+                            <button
+                              onClick={() => handleCopyNotice(batch.notice, batch.id)}
+                              className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors px-2 py-0.5 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
+                            >
+                              📋 复制公告
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-slate-300 text-[11px] leading-relaxed line-clamp-3 whitespace-pre-line font-medium">
+                          {batch.notice ? batch.notice : '遵照班次排行榜目标准时发车'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Button */}
+                    <div className="pt-2 border-t border-white/10">
                       <button
                         onClick={() => handleEnterCabinClick(batch.id)}
-                        className="px-4 py-2.5 rounded-xl glass-button text-slate-200 text-xs font-semibold hover:text-white flex items-center gap-1 transition-all"
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold shadow-md transition-all flex items-center justify-center gap-1.5 group-hover:border-emerald-500/60"
                       >
                         <span>进入车厢</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </button>
                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Detailed Player Info Modal (明细玩家信息) */}
-      {selectedRosterBatch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-          <div
-            className="glass-panel relative w-full max-w-xl rounded-2xl p-6 shadow-2xl border border-white/10 overflow-hidden text-slate-100 max-h-[85vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    班次明细玩家列表 [{selectedRosterBatch.time}]
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    查看此班次预约特工的微信头像、游戏昵称与游戏 ID
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedRosterBatch(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Roster List Body */}
-            <div className="overflow-y-auto space-y-3 pr-1 flex-1">
-              {/* If current user is booked in this batch, show user first */}
-              {user && userBooking?.batchId === selectedRosterBatch.id && (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-html-element-suppression */}
-                    <img
-                      src={user.avatar}
-                      alt={user.gameNickname}
-                      className="w-10 h-10 rounded-xl object-cover border border-emerald-400 shadow-md"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-extrabold text-white">
-                          {user.gameNickname}
-                        </span>
-                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                          你自己
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-0.5 font-mono">
-                        <span>微信号: {user.wechatName}</span>
-                        <span>游戏 ID: {user.gameId}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> 已锁定
-                  </span>
-                </div>
-              )}
-
-              {/* Render Mock Roster Players */}
-              {MOCK_ROSTER_PLAYERS.map((player) => (
-                <div
-                  key={player.openId}
-                  className="p-3 rounded-xl bg-slate-900/50 border border-white/5 hover:border-white/10 flex items-center justify-between transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-html-element-suppression */}
-                    <img
-                      src={player.avatar}
-                      alt={player.gameNickname}
-                      className="w-10 h-10 rounded-xl object-cover border border-white/10"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-100">
-                          {player.gameNickname}
-                        </span>
-                        <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
-                          {player.role}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-0.5 font-mono">
-                        <span>微信: {player.wechatName}</span>
-                        <span>游戏 ID: {player.gameId}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400 block font-mono">
-                      预约已锁定
-                    </span>
-                    <span className="text-[10px] text-emerald-400 font-semibold">106分匹配中</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div className="pt-4 border-t border-white/10 mt-3 flex justify-end">
-              <button
-                onClick={() => setSelectedRosterBatch(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors"
-              >
-                关闭
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* QR Code Modal */}
-      {selectedQrBatch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-          <div
-            className="glass-panel relative w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-white/10 text-center text-slate-100 space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-purple-400" />
-                <span>[{selectedQrBatch.time}] 发车群/特工二维码</span>
-              </h3>
-              <button
-                onClick={() => setSelectedQrBatch(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 bg-white rounded-2xl inline-block shadow-xl">
-              {/* eslint-disable-next-html-element-suppression */}
-              <img
-                src={selectedQrBatch.qrCodeUrl}
-                alt="发车二维码"
-                className="w-48 h-48 mx-auto object-contain"
-              />
-            </div>
-
-            <p className="text-xs text-slate-300 leading-relaxed">
-              扫码加入班次群或在游戏内搜索 ID / 特工头像完成匹配。
-            </p>
-
-            <button
-              onClick={() => setSelectedQrBatch(null)}
-              className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors"
-            >
-              关闭
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Auth Modal Trigger for Unauthenticated users */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
     </div>
   );
 };

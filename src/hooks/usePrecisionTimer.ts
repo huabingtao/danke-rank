@@ -15,6 +15,10 @@ export function usePrecisionTimer(targetTimeStr: string) {
       } else {
         const [h, m, s] = targetTimeStr.split(':').map(Number);
         target.setHours(h || 0, m || 0, s || 0, 0);
+        // If today's target time has passed, set to tomorrow's target time
+        if (target.getTime() <= now.getTime()) {
+          target.setDate(target.getDate() + 1);
+        }
       }
 
       let diff = target.getTime() - now.getTime();
@@ -23,13 +27,13 @@ export function usePrecisionTimer(targetTimeStr: string) {
       const hours = String(Math.floor(diff / 3600000)).padStart(2, '0');
       const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
       const secs = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-      const ms = String(Math.floor((diff % 1000) / 100));
+      const ms = String(Math.floor(((diff % 1000) / 1000) * 60)).padStart(2, '0');
 
       setTimeLeft({ hours, mins, secs, ms });
     };
 
     updateTimer();
-    const interval = setInterval(updateTimer, 100);
+    const interval = setInterval(updateTimer, 16);
 
     return () => clearInterval(interval);
   }, [targetTimeStr]);

@@ -23,10 +23,12 @@ export interface Batch {
 }
 
 export interface Booking {
+  openId: string;
   batchId: string;
   locked: boolean;
   status: 'booked' | 'invalid_unlocked';
   bookedAt: number;
+  user?: User;
 }
 
 export interface AppState {
@@ -39,7 +41,7 @@ export interface AppState {
   addBatch: (batch: Batch) => void;
   updateBatch: (updated: Batch) => void;
   deleteBatch: (batchId: string) => void;
-  bookBatch: (openId: string, batchId: string) => void;
+  bookBatch: (openId: string, batchId: string, userDetails?: User) => void;
   unlockBooking: (openId: string) => void;
   markBatchInvalid: (batchId: string) => void;
 }
@@ -51,32 +53,99 @@ export const useStore = create<AppState>()(
       isAdmin: false,
       batches: [
         {
-          id: 'batch-01',
+          id: '20260725-0005-66',
           date: '2026-07-25',
-          time: '01:05:00',
-          targetScore: 106,
+          time: '00:05:00',
+          targetScore: 66,
           maxCapacity: 200,
-          currentCount: 184,
-          avatarUrl: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=120&auto=format&fit=crop&q=80',
-          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Group01',
-          notice: '【01:05 冲刺班】统一更换为特工阿猫头像！打到 106 分即刻停手共享史诗配件。',
+          currentCount: 0,
+          avatarUrl: '/avatars/科萌.png',
+          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup66',
+          notice: `本群为66精准并列群，非66的朋友请自觉退群。
+📢 活动并列第一怎么玩？
+• 第一天：进度66，0点前下线。
+• 第二天：凌晨看群通知，几百人秒级同步上线。
+• 分到一组的人：5人建群，商量好不要动进度。
+• 后面几天：继续保持同分，一起拿第一。
+• 最后一天定好目标并列分数，也可以一起并列拿第一。`,
           status: 'active',
         },
         {
-          id: 'batch-02',
+          id: '20260725-0805-106',
           date: '2026-07-25',
           time: '08:05:00',
           targetScore: 106,
           maxCapacity: 200,
-          currentCount: 42,
-          avatarUrl: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=120&auto=format&fit=crop&q=80',
-          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Group02',
-          notice: '【08:05 上班族班】早晨发车，请各位玩家准时卡点！',
+          currentCount: 0,
+          avatarUrl: '/avatars/凯蒂斯.png',
+          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup106',
+          notice: `本群为106精准并列群，非106的朋友请自觉退群。
+📢 活动并列第一怎么玩？
+• 第一天：进度106，0点前下线。
+• 第二天：凌晨看群通知，几百人秒级同步上线。
+• 分到一组的人：5人建群，商量好不要动进度。
+• 后面几天：继续保持同分，一起拿第一。
+• 最后一天定好目标并列分数，也可以一起并列拿第一。`,
+          status: 'active',
+        },
+        {
+          id: '20260723-0005-66',
+          date: '2026-07-23',
+          time: '00:05:00',
+          targetScore: 66,
+          maxCapacity: 200,
+          currentCount: 0,
+          avatarUrl: '/avatars/沃尔默.png',
+          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup66Hist',
+          notice: `本群为66精准并列历史发车班次战术归档。`,
           status: 'active',
         },
       ],
       bookings: {},
-      setUser: (user) => set({ user }),
+      setUser: (newUser) =>
+        set((state) => {
+          if (!newUser) {
+            // When user clears profile data (清除资料), automatically cancel active booking & decrement batch count
+            if (state.user?.openId) {
+              const openId = state.user.openId;
+              const existingBooking = state.bookings[openId];
+              if (existingBooking) {
+                const { batchId } = existingBooking;
+                const newBookings = { ...state.bookings };
+                delete newBookings[openId];
+                return {
+                  user: null,
+                  bookings: newBookings,
+                  batches: state.batches.map((b) =>
+                    b.id === batchId
+                      ? { ...b, currentCount: Math.max(0, b.currentCount - 1) }
+                      : b
+                  ),
+                };
+              }
+            }
+            return { user: null };
+          }
+
+          // Preserve persistent openId for this device/user
+          const persistentOpenId =
+            state.user?.openId || newUser.openId || `dev_usr_${Date.now()}`;
+          const updatedUser = { ...newUser, openId: persistentOpenId };
+
+          // Sync nickname and avatar updates to any active booking
+          const existingBooking = state.bookings[persistentOpenId];
+          const newBookings = existingBooking
+            ? {
+                ...state.bookings,
+                [persistentOpenId]: {
+                  ...existingBooking,
+                  user: updatedUser,
+                },
+              }
+            : state.bookings;
+
+          return { user: updatedUser, bookings: newBookings };
+        }),
       setIsAdmin: (isAdmin) => set({ isAdmin }),
       addBatch: (batch) => set((state) => ({ batches: [batch, ...state.batches] })),
       updateBatch: (updated) =>
@@ -87,11 +156,18 @@ export const useStore = create<AppState>()(
         set((state) => ({
           batches: state.batches.filter((b) => b.id !== batchId),
         })),
-      bookBatch: (openId, batchId) =>
+      bookBatch: (openId, batchId, userDetails) =>
         set((state) => ({
           bookings: {
             ...state.bookings,
-            [openId]: { batchId, locked: true, status: 'booked', bookedAt: Date.now() },
+            [openId]: {
+              openId,
+              batchId,
+              locked: true,
+              status: 'booked',
+              bookedAt: Date.now(),
+              user: userDetails || state.user || undefined,
+            },
           },
           batches: state.batches.map((b) =>
             b.id === batchId ? { ...b, currentCount: b.currentCount + 1 } : b
@@ -99,9 +175,19 @@ export const useStore = create<AppState>()(
         })),
       unlockBooking: (openId) =>
         set((state) => {
+          const booking = state.bookings[openId];
+          if (!booking) return state;
+          const { batchId } = booking;
           const newBookings = { ...state.bookings };
           delete newBookings[openId];
-          return { bookings: newBookings };
+          return {
+            bookings: newBookings,
+            batches: state.batches.map((b) =>
+              b.id === batchId
+                ? { ...b, currentCount: Math.max(0, b.currentCount - 1) }
+                : b
+            ),
+          };
         }),
       markBatchInvalid: (batchId) =>
         set((state) => ({
