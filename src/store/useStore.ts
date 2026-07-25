@@ -36,127 +36,117 @@ export interface AppState {
   isAdmin: boolean;
   batches: Batch[];
   bookings: Record<string, Booking>;
+  loading: boolean;
+  fetchBatches: () => Promise<void>;
   setUser: (user: User | null) => void;
   setIsAdmin: (isAdmin: boolean) => void;
-  addBatch: (batch: Batch) => void;
-  updateBatch: (updated: Batch) => void;
-  deleteBatch: (batchId: string) => void;
-  bookBatch: (openId: string, batchId: string, userDetails?: User) => void;
-  unlockBooking: (openId: string) => void;
-  markBatchInvalid: (batchId: string) => void;
+  addBatch: (batch: Batch) => Promise<void>;
+  updateBatch: (updated: Batch) => Promise<void>;
+  deleteBatch: (batchId: string) => Promise<void>;
+  bookBatch: (openId: string, batchId: string, userDetails?: User) => Promise<void>;
+  unlockBooking: (openId: string) => Promise<void>;
+  markBatchInvalid: (batchId: string) => Promise<void>;
+  resetDatabase: () => Promise<void>;
+  clearAllData: () => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAdmin: false,
-      batches: [
-        {
-          id: '20260725-0005-66',
-          date: '2026-07-25',
-          time: '00:05:00',
-          targetScore: 66,
-          maxCapacity: 200,
-          currentCount: 0,
-          avatarUrl: '/avatars/科萌.png',
-          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup66',
-          notice: `本群为66精准并列群，非66的朋友请自觉退群。
-📢 活动并列第一怎么玩？
-• 第一天：进度66，0点前下线。
-• 第二天：凌晨看群通知，几百人秒级同步上线。
-• 分到一组的人：5人建群，商量好不要动进度。
-• 后面几天：继续保持同分，一起拿第一。
-• 最后一天定好目标并列分数，也可以一起并列拿第一。`,
-          status: 'active',
-        },
-        {
-          id: '20260725-0805-106',
-          date: '2026-07-25',
-          time: '08:05:00',
-          targetScore: 106,
-          maxCapacity: 200,
-          currentCount: 0,
-          avatarUrl: '/avatars/凯蒂斯.png',
-          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup106',
-          notice: `本群为106精准并列群，非106的朋友请自觉退群。
-📢 活动并列第一怎么玩？
-• 第一天：进度106，0点前下线。
-• 第二天：凌晨看群通知，几百人秒级同步上线。
-• 分到一组的人：5人建群，商量好不要动进度。
-• 后面几天：继续保持同分，一起拿第一。
-• 最后一天定好目标并列分数，也可以一起并列拿第一。`,
-          status: 'active',
-        },
-        {
-          id: '20260723-0005-66',
-          date: '2026-07-23',
-          time: '00:05:00',
-          targetScore: 66,
-          maxCapacity: 200,
-          currentCount: 0,
-          avatarUrl: '/avatars/沃尔默.png',
-          qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TieGroup66Hist',
-          notice: `本群为66精准并列历史发车班次战术归档。`,
-          status: 'active',
-        },
-      ],
+      batches: [],
       bookings: {},
+      loading: false,
+
+      fetchBatches: async () => {
+        set({ loading: true });
+        try {
+          const res = await fetch('/api/batches');
+          const data = await res.json();
+          if (data.success) {
+            set({ batches: data.batches || [], loading: false });
+          } else {
+            set({ loading: false });
+          }
+        } catch (e) {
+          console.error('Error fetching batches:', e);
+          set({ loading: false });
+        }
+      },
+
       setUser: (newUser) =>
         set((state) => {
           if (!newUser) {
-            // When user clears profile data (清除资料), automatically cancel active booking & decrement batch count
             if (state.user?.openId) {
               const openId = state.user.openId;
-              const existingBooking = state.bookings[openId];
-              if (existingBooking) {
-                const { batchId } = existingBooking;
-                const newBookings = { ...state.bookings };
-                delete newBookings[openId];
-                return {
-                  user: null,
-                  bookings: newBookings,
-                  batches: state.batches.map((b) =>
-                    b.id === batchId
-                      ? { ...b, currentCount: Math.max(0, b.currentCount - 1) }
-                      : b
-                  ),
-                };
-              }
+              get().unlockBooking(openId);
             }
             return { user: null };
           }
-
-          // Preserve persistent openId for this device/user
           const persistentOpenId =
             state.user?.openId || newUser.openId || `dev_usr_${Date.now()}`;
-          const updatedUser = { ...newUser, openId: persistentOpenId };
-
-          // Sync nickname and avatar updates to any active booking
-          const existingBooking = state.bookings[persistentOpenId];
-          const newBookings = existingBooking
-            ? {
-                ...state.bookings,
-                [persistentOpenId]: {
-                  ...existingBooking,
-                  user: updatedUser,
-                },
-              }
-            : state.bookings;
-
-          return { user: updatedUser, bookings: newBookings };
+          return { user: { ...newUser, openId: persistentOpenId } };
         }),
+
       setIsAdmin: (isAdmin) => set({ isAdmin }),
-      addBatch: (batch) => set((state) => ({ batches: [batch, ...state.batches] })),
-      updateBatch: (updated) =>
+
+      addBatch: async (batch) => {
+        // Optimistic update
+        set((state) => ({ batches: [batch, ...state.batches] }));
+        try {
+          const res = await fetch('/api/batches', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(batch),
+          });
+          const data = await res.json();
+          if (data.success && data.batches) {
+            set({ batches: data.batches });
+          }
+        } catch (e) {
+          console.error('Failed to sync addBatch:', e);
+        }
+      },
+
+      updateBatch: async (updated) => {
         set((state) => ({
           batches: state.batches.map((b) => (b.id === updated.id ? updated : b)),
-        })),
-      deleteBatch: (batchId) =>
+        }));
+        try {
+          const res = await fetch(`/api/batches/${updated.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated),
+          });
+          const data = await res.json();
+          if (data.success && data.batches) {
+            set({ batches: data.batches });
+          }
+        } catch (e) {
+          console.error('Failed to sync updateBatch:', e);
+        }
+      },
+
+      deleteBatch: async (batchId) => {
         set((state) => ({
           batches: state.batches.filter((b) => b.id !== batchId),
-        })),
-      bookBatch: (openId, batchId, userDetails) =>
+        }));
+        try {
+          const res = await fetch(`/api/batches/${batchId}`, {
+            method: 'DELETE',
+          });
+          const data = await res.json();
+          if (data.success && data.batches) {
+            set({ batches: data.batches });
+          }
+        } catch (e) {
+          console.error('Failed to sync deleteBatch:', e);
+        }
+      },
+
+      bookBatch: async (openId, batchId, userDetails) => {
+        const u = userDetails || get().user;
         set((state) => ({
           bookings: {
             ...state.bookings,
@@ -166,14 +156,35 @@ export const useStore = create<AppState>()(
               locked: true,
               status: 'booked',
               bookedAt: Date.now(),
-              user: userDetails || state.user || undefined,
+              user: u || undefined,
             },
           },
           batches: state.batches.map((b) =>
             b.id === batchId ? { ...b, currentCount: b.currentCount + 1 } : b
           ),
-        })),
-      unlockBooking: (openId) =>
+        }));
+
+        try {
+          const res = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              openId,
+              batchId,
+              userName: u?.gameNickname || u?.wechatName || '特工玩家',
+              avatarUrl: u?.avatar || '/avatars/科萌.png',
+            }),
+          });
+          const data = await res.json();
+          if (data.success && data.batches) {
+            set({ batches: data.batches });
+          }
+        } catch (e) {
+          console.error('Failed to sync bookBatch:', e);
+        }
+      },
+
+      unlockBooking: async (openId) => {
         set((state) => {
           const booking = state.bookings[openId];
           if (!booking) return state;
@@ -188,16 +199,65 @@ export const useStore = create<AppState>()(
                 : b
             ),
           };
-        }),
-      markBatchInvalid: (batchId) =>
-        set((state) => ({
-          batches: state.batches.map((b) =>
-            b.id === batchId
-              ? { ...b, status: b.status === 'active' ? 'invalid' : 'active' }
-              : b
-          ),
-        })),
+        });
+
+        try {
+          const res = await fetch('/api/bookings', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ openId }),
+          });
+          const data = await res.json();
+          if (data.success && data.batches) {
+            set({ batches: data.batches });
+          }
+        } catch (e) {
+          console.error('Failed to sync unlockBooking:', e);
+        }
+      },
+
+      markBatchInvalid: async (batchId) => {
+        const batch = get().batches.find((b) => b.id === batchId);
+        if (!batch) return;
+        const newStatus = batch.status === 'active' ? 'invalid' : 'active';
+        await get().updateBatch({ ...batch, status: newStatus });
+      },
+
+      resetDatabase: async () => {
+        try {
+          const res = await fetch('/api/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'reset' }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            set({ batches: data.batches, bookings: {} });
+          }
+        } catch (e) {
+          console.error('Failed to reset database:', e);
+        }
+      },
+
+      clearAllData: async () => {
+        try {
+          const res = await fetch('/api/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'clear' }),
+          });
+          const data = await res.json();
+          if (data.success) {
+            set({ batches: [], bookings: {} });
+          }
+        } catch (e) {
+          console.error('Failed to clear database:', e);
+        }
+      },
     }),
-    { name: 'survivor-tie-next-store' }
+    {
+      name: 'danke-rank-store',
+      partialize: (state) => ({ user: state.user, isAdmin: state.isAdmin }),
+    }
   )
 );

@@ -24,8 +24,9 @@ export interface CabinRoomProps {
 export const CabinRoom: React.FC<CabinRoomProps> = ({ batch, onBackLobby }) => {
   const { user, unlockBooking, markBatchInvalid } = useStore();
 
-  // 1. 调用高精度秒/两位数毫秒级跳跃倒计时 Hook
-  const { hours, mins, secs, ms } = usePrecisionTimer(batch.time);
+  // 1. 调用高精度秒/两位数毫秒级跳跃倒计时 Hook (合并日期与时间)
+  const targetDateTime = batch.date ? `${batch.date} ${batch.time}` : batch.time;
+  const { hours, mins, secs, ms } = usePrecisionTimer(targetDateTime);
 
   // 状态管理
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -106,14 +107,17 @@ export const CabinRoom: React.FC<CabinRoomProps> = ({ batch, onBackLobby }) => {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4 relative z-10">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-3.5 w-3.5">
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-4 w-4 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-cyan-500"></span>
             </span>
-            <span className="text-base font-extrabold text-slate-100 tracking-wide">
-              距离 {batch.time} 发车倒计时
-            </span>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-100 tracking-wide flex flex-wrap items-center gap-2">
+              <span>距离</span>
+              {batch.date && <span className="text-cyan-400 font-mono">{batch.date}</span>}
+              <span className="text-cyan-300 font-mono">{batch.time}</span>
+              <span>发车倒计时</span>
+            </h3>
           </div>
 
           {/* 搬移至倒计时卡片顶部右上角 */}

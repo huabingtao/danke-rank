@@ -7,14 +7,22 @@ import { CabinRoom } from '../components/CabinRoom';
 import { useStore } from '../store/useStore';
 
 export default function Home() {
-  const { batches } = useStore();
+  const { batches, fetchBatches } = useStore();
   const [mounted, setMounted] = useState(false);
   const [currentView, setCurrentView] = useState<'lobby' | 'cabin'>('lobby');
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    fetchBatches();
+
+    // Auto poll database every 5 seconds for real-time multi-device sync
+    const interval = setInterval(() => {
+      fetchBatches();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [fetchBatches]);
 
   // Global custom event listener for enterCabin
   useEffect(() => {

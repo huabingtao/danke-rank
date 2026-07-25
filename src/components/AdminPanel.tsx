@@ -41,6 +41,10 @@ const pickerTheme = {
 // Preset Avatars for quick selection (Official Survivor.io Agents)
 const PRESET_AVATARS = [
   {
+    name: '老板',
+    url: '/avatars/老板.png',
+  },
+  {
     name: '科萌',
     url: '/avatars/科萌.png',
   },
@@ -75,7 +79,7 @@ const PRESET_AVATARS = [
 ];
 
 export const AdminPanel: React.FC = () => {
-  const { batches, addBatch, updateBatch, deleteBatch, markBatchInvalid } =
+  const { batches, addBatch, updateBatch, deleteBatch, markBatchInvalid, resetDatabase, clearAllData, fetchBatches } =
     useStore();
 
   // Form State with specified defaults: targetScore = 66, notice = ''
@@ -203,14 +207,46 @@ export const AdminPanel: React.FC = () => {
           </div>
 
           {/* Quick Metrics Cards */}
-          <div className="grid grid-cols-2 gap-3 min-w-[220px]">
-            <div className="glass-card p-3 rounded-xl border border-white/5 text-center">
-              <div className="text-[10px] text-slate-400">总发车班次</div>
-              <div className="text-lg font-extrabold text-slate-100">{batches.length}</div>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="grid grid-cols-2 gap-3 min-w-[220px]">
+              <div className="glass-card p-3 rounded-xl border border-white/5 text-center">
+                <div className="text-[10px] text-slate-400">总发车班次</div>
+                <div className="text-lg font-extrabold text-slate-100">{batches.length}</div>
+              </div>
+              <div className="glass-card p-3 rounded-xl border border-emerald-500/20 text-center bg-emerald-500/5">
+                <div className="text-[10px] text-emerald-400 font-medium">进行中车次</div>
+                <div className="text-lg font-extrabold text-emerald-300">{totalActive}</div>
+              </div>
             </div>
-            <div className="glass-card p-3 rounded-xl border border-emerald-500/20 text-center bg-emerald-500/5">
-              <div className="text-[10px] text-emerald-400 font-medium">进行中车次</div>
-              <div className="text-lg font-extrabold text-emerald-300">{totalActive}</div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  if (window.confirm('确认要清空数据库中所有发车班次和预约数据吗？此操作不可撤销。')) {
+                    await clearAllData();
+                    showNotification('info', '数据库已成功清空所有发车班次及预约！');
+                  }
+                }}
+                className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
+                title="清空所有班次与预约"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                <span>清空所有数据</span>
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (window.confirm('确认要重置数据库并恢复 7月26日 4 个预设发车班次吗？')) {
+                    await resetDatabase();
+                    showNotification('success', '已重新生成 7月26日 4 个标准预设发车班次！');
+                  }
+                }}
+                className="px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
+                title="重置为 7月26日 4 个发车班次"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
+                <span>恢复 4 个预设班次</span>
+              </button>
             </div>
           </div>
         </div>

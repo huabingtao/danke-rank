@@ -157,94 +157,94 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
       {/* 2-Column Layout Container (Left 3 cols, Right 9 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: 并列活动玩法 (lg:col-span-3) */}
-        <div className="lg:col-span-3 glass-panel rounded-2xl p-4.5 border border-white/10 space-y-3.5">
+        <div className="lg:col-span-3 glass-panel rounded-2xl p-6 border border-white/10 space-y-4">
           {/* Section Header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
                 <Gamepad2 className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-xs text-white tracking-tight">并列活动玩法指南</h3>
+              <h3 className="font-extrabold text-sm text-white tracking-tight">并列活动玩法指南</h3>
             </div>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
               稳拿第一
             </span>
           </div>
 
           {/* Core Principle Card */}
-          <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-500/20 text-xs space-y-1">
+          <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-emerald-500/10 to-teal-500/10 border border-amber-500/20 text-xs space-y-1.5">
             <div className="flex items-center gap-1.5 font-extrabold text-amber-300">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
               <span>核心机制：同分共享第 1 名</span>
             </div>
-            <p className="text-slate-300 leading-relaxed text-[10.5px]">
+            <p className="text-slate-300 leading-relaxed text-xs">
               组内 5 人保持相同目标分数，实现<strong className="text-emerald-400 font-bold">全员并列第 1 名</strong>！5天活动最高可拿 <strong className="text-amber-300 font-bold">4 个金配件/金宠物</strong>。
             </p>
           </div>
 
           {/* 5-Step Process */}
-          <div className="space-y-2">
-            <h4 className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span>通关 5 步流程：</span>
             </h4>
 
-            <div className="space-y-1 text-xs">
-              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
-                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+            <div className="space-y-2 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                   1
                 </span>
                 <div>
-                  <div className="font-bold text-slate-200 text-[10.5px]">首日停分下线</div>
-                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                  <div className="font-bold text-slate-200 text-xs">首日停分下线</div>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
                     第 1 天打到目标分（如 66 分），<strong className="text-amber-300 font-normal">24点前必须下线</strong>。
                   </p>
                 </div>
               </div>
 
-              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
-                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                   2
                 </span>
                 <div>
-                  <div className="font-bold text-slate-200 text-[10.5px]">精确秒级上线</div>
-                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                  <div className="font-bold text-slate-200 text-xs">精确秒级上线</div>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
                     第 2 天看群通知，配合“悬浮时钟”<strong className="text-emerald-300 font-normal">精确到秒同步上线</strong>。
                   </p>
                 </div>
               </div>
 
-              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
-                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                   3
                 </span>
                 <div>
-                  <div className="font-bold text-slate-200 text-[10.5px]">同组 5 人建群</div>
-                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                  <div className="font-bold text-slate-200 text-xs">同组 5 人建群</div>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
                     匹配成功后 5 人拉小群，沟通约定<strong className="text-amber-300 font-normal">统一锁定分数不再增加</strong>。
                   </p>
                 </div>
               </div>
 
-              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
-                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                   4
                 </span>
                 <div>
-                  <div className="font-bold text-slate-200 text-[10.5px]">全程保持同分</div>
-                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                  <div className="font-bold text-slate-200 text-xs">全程保持同分</div>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
                     后续几天继续保持同分锁榜，共同霸榜第一名。
                   </p>
                 </div>
               </div>
 
-              <div className="p-2 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2">
-                <span className="w-4.5 h-4.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                   5
                 </span>
                 <div>
-                  <div className="font-bold text-slate-200 text-[10.5px]">终局并列拿满</div>
-                  <p className="text-[9.5px] text-slate-400 leading-tight">
+                  <div className="font-bold text-slate-200 text-xs">终局并列拿满</div>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
                     最后一天定好目标分齐步走，全员满额领奖！
                   </p>
                 </div>
@@ -253,11 +253,11 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
           </div>
 
           {/* Quick Notice Section */}
-          <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1 text-[10.5px]">
-            <div className="font-bold text-amber-300 flex items-center gap-1">
+          <div className="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1.5 text-xs">
+            <div className="font-bold text-amber-300 flex items-center gap-1.5">
               <span>‼️ 进群必备规则</span>
             </div>
-            <ul className="text-slate-300 space-y-0.5 text-[9.5px] list-disc list-inside leading-relaxed">
+            <ul className="text-slate-300 space-y-1 text-[11px] list-disc list-inside leading-relaxed">
               <li>更换游戏内指定老板头像</li>
               <li>群昵称与游戏内昵称保持一致</li>
               <li>进群发送 66/106 进度截图标记</li>
