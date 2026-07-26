@@ -78,17 +78,25 @@ const PRESET_AVATARS = [
   },
 ];
 
+const getNoticeDefault = (score: number) =>
+  `本群为${score}精准并列群，非${score}的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度${score}，0点前下线。\n• 第二天：看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。`;
+
 export const AdminPanel: React.FC = () => {
   const { batches, addBatch, updateBatch, deleteBatch, markBatchInvalid, resetDatabase, clearAllData, fetchBatches } =
     useStore();
 
-  // Form State with specified defaults: targetScore = 66, notice = ''
+  // Fetch latest batches from database on mount
+  React.useEffect(() => {
+    fetchBatches();
+  }, [fetchBatches]);
+
+  // Form State with specified defaults: targetScore = 66, notice = dynamic default without hardcoded time
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     time: '20:00:00',
     targetScore: 66,
     avatarUrl: PRESET_AVATARS[0].url,
-    notice: '',
+    notice: getNoticeDefault(66),
   });
 
   // UI States
@@ -137,11 +145,11 @@ export const AdminPanel: React.FC = () => {
     addBatch(newBatch);
     showNotification('success', `成功发布发车班次 #${newBatch.id}！`);
 
-    // Reset optional notice field while keeping useful defaults
+    // Reset form fields with useful defaults
     setFormData((prev) => ({
       ...prev,
       time: '21:00:00',
-      notice: '',
+      notice: getNoticeDefault(prev.targetScore),
     }));
   };
 
@@ -217,36 +225,6 @@ export const AdminPanel: React.FC = () => {
                 <div className="text-[10px] text-emerald-400 font-medium">进行中车次</div>
                 <div className="text-lg font-extrabold text-emerald-300">{totalActive}</div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={async () => {
-                  if (window.confirm('确认要清空数据库中所有发车班次和预约数据吗？此操作不可撤销。')) {
-                    await clearAllData();
-                    showNotification('info', '数据库已成功清空所有发车班次及预约！');
-                  }
-                }}
-                className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
-                title="清空所有班次与预约"
-              >
-                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                <span>清空所有数据</span>
-              </button>
-
-              <button
-                onClick={async () => {
-                  if (window.confirm('确认要重置数据库并恢复 7月26日 4 个预设发车班次吗？')) {
-                    await resetDatabase();
-                    showNotification('success', '已重新生成 7月26日 4 个标准预设发车班次！');
-                  }
-                }}
-                className="px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
-                title="重置为 7月26日 4 个发车班次"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
-                <span>恢复 4 个预设班次</span>
-              </button>
             </div>
           </div>
         </div>
@@ -329,12 +307,14 @@ export const AdminPanel: React.FC = () => {
                     min={1}
                     max={999}
                     value={formData.targetScore}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        targetScore: parseInt(e.target.value) || 0,
-                      })
-                    }
+                    onChange={(e) => {
+                      const score = parseInt(e.target.value) || 0;
+                      setFormData((prev) => ({
+                        ...prev,
+                        targetScore: score,
+                        notice: getNoticeDefault(score),
+                      }));
+                    }}
                     className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 text-xs font-mono pr-8"
                   />
                   <span className="absolute right-3 top-2.5 text-[10px] text-slate-400">分</span>
