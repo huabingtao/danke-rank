@@ -115,6 +115,41 @@ export const AdminPanel: React.FC = () => {
     }, 3500);
   };
 
+  // QR Code List State (up to 2)
+  const [createQrCodes, setCreateQrCodes] = useState<{ url: string; description: string }[]>([]);
+
+  // Handle local image file upload for QR code
+  const handleQrFileUpload = (file: File, isEdit: boolean = false, indexToUpdate?: number) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (!dataUrl) return;
+
+      if (!isEdit) {
+        setCreateQrCodes((prev) => {
+          if (indexToUpdate !== undefined && prev[indexToUpdate]) {
+            const next = [...prev];
+            next[indexToUpdate] = { ...next[indexToUpdate], url: dataUrl };
+            return next;
+          }
+          if (prev.length >= 2) return prev;
+          return [...prev, { url: dataUrl, description: '' }];
+        });
+      } else {
+        if (!editingBatch) return;
+        const currentQrs = editingBatch.qrCodes || [];
+        let nextQrs = [...currentQrs];
+        if (indexToUpdate !== undefined && nextQrs[indexToUpdate]) {
+          nextQrs[indexToUpdate] = { ...nextQrs[indexToUpdate], url: dataUrl };
+        } else {
+          nextQrs.push({ url: dataUrl, description: '' });
+        }
+        setEditingBatch({ ...editingBatch, qrCodes: nextQrs });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Handle new batch submission
   const handleCreateBatch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +172,8 @@ export const AdminPanel: React.FC = () => {
       maxCapacity: 200,
       currentCount: 0,
       avatarUrl: formData.avatarUrl.trim(),
-      qrCodeUrl: '',
+      qrCodeUrl: createQrCodes[0]?.url || '',
+      qrCodes: createQrCodes.filter((q) => q.url.trim() !== ''),
       notice: formData.notice.trim(),
       status: 'active',
     };
@@ -151,6 +187,7 @@ export const AdminPanel: React.FC = () => {
       time: '21:00:00',
       notice: getNoticeDefault(prev.targetScore),
     }));
+    setCreateQrCodes([]);
   };
 
   // Handle edit batch submit
@@ -363,7 +400,92 @@ export const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
-              {/* Row 4: Shift Announcement */}
+              {/* Row 4: QR Code Uploads (Max 2) */}
+              <div className="space-y-2 pt-1 border-t border-white/5">
+                <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>配置班次二维码（最多 2 张）</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    已添加 {createQrCodes.length} / 2 张
+                  </span>
+                </label>
+
+                <div className="space-y-2">
+                  {createQrCodes.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-white/10"
+                    >
+                      {/* Thumbnail Preview */}
+                      {/* eslint-disable-next-html-element-suppression */}
+                      <img
+                        src={item.url}
+                        alt={`QR ${idx + 1}`}
+                        className="w-12 h-12 rounded-lg object-cover border border-cyan-500/30 shrink-0"
+                      />
+                      {/* Description Input */}
+                      <input
+                        type="text"
+                        placeholder={`二维码 ${idx + 1} 描述（如：微信群/队长微信）`}
+                        value={item.description}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCreateQrCodes((prev) => {
+                            const next = [...prev];
+                            next[idx] = { ...next[idx], description: val };
+                            return next;
+                          });
+                        }}
+                        className="flex-1 glass-input px-3 py-1.5 rounded-lg text-slate-100 text-xs font-mono"
+                      />
+                      {/* Replace Image Button */}
+                      <label className="p-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 cursor-pointer text-[10px] shrink-0">
+                        <span>更换</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleQrFileUpload(file, false, idx);
+                          }}
+                        />
+                      </label>
+                      {/* Remove Button */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCreateQrCodes((prev) => prev.filter((_, i) => i !== idx))
+                        }
+                        className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 shrink-0"
+                        title="删除该二维码"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {createQrCodes.length < 2 && (
+                    <label className="w-full py-2.5 rounded-xl border-2 border-dashed border-white/15 hover:border-cyan-500/50 bg-slate-900/30 hover:bg-slate-900/50 text-slate-400 hover:text-cyan-300 transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
+                      <PlusCircle className="w-4 h-4 text-cyan-400" />
+                      <span>上传第 {createQrCodes.length + 1} 张二维码图片</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleQrFileUpload(file, false);
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 5: Shift Announcement */}
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
                   <Megaphone className="w-3.5 h-3.5 text-blue-400" />
@@ -696,6 +818,85 @@ export const AdminPanel: React.FC = () => {
                   }
                   className="w-full glass-input px-3 py-2 rounded-xl text-slate-100 font-mono text-xs"
                 />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-slate-300 font-semibold mb-1 block">
+                  班次二维码配置（最多 2 张）
+                </label>
+                <div className="space-y-2">
+                  {((editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
+                    ? editingBatch.qrCodes
+                    : (editingBatch.qrCodeUrl ? [{ url: editingBatch.qrCodeUrl, description: '' }] : [])
+                  ).map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-white/10"
+                    >
+                      {/* eslint-disable-next-html-element-suppression */}
+                      <img
+                        src={item.url}
+                        alt={`QR ${idx + 1}`}
+                        className="w-10 h-10 rounded-lg object-cover border border-cyan-500/30 shrink-0"
+                      />
+                      <input
+                        type="text"
+                        placeholder={`二维码 ${idx + 1} 描述`}
+                        value={item.description || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const currentQrs = (editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
+                            ? [...editingBatch.qrCodes]
+                            : (editingBatch.qrCodeUrl ? [{ url: editingBatch.qrCodeUrl, description: '' }] : []);
+                          currentQrs[idx] = { ...currentQrs[idx], description: val };
+                          setEditingBatch({ ...editingBatch, qrCodes: currentQrs, qrCodeUrl: currentQrs[0]?.url || '' });
+                        }}
+                        className="flex-1 glass-input px-3 py-1.5 rounded-lg text-slate-100 text-xs font-mono"
+                      />
+                      <label className="p-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 cursor-pointer text-[10px] shrink-0">
+                        <span>更换</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleQrFileUpload(file, true, idx);
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const currentQrs = (editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
+                            ? editingBatch.qrCodes.filter((_, i) => i !== idx)
+                            : [];
+                          setEditingBatch({ ...editingBatch, qrCodes: currentQrs, qrCodeUrl: currentQrs[0]?.url || '' });
+                        }}
+                        className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 shrink-0"
+                        title="删除"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {((editingBatch.qrCodes || []).length < 2) && (
+                    <label className="w-full py-2 rounded-xl border border-dashed border-white/15 hover:border-cyan-500/50 bg-slate-900/30 text-slate-400 hover:text-cyan-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-xs">
+                      <PlusCircle className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>上传二维码图 {((editingBatch.qrCodes || []).length + 1)}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleQrFileUpload(file, true);
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
               </div>
 
               <div>

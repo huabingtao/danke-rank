@@ -9,6 +9,11 @@ export interface User {
   gameNickname: string;
 }
 
+export interface QRCodeItem {
+  url: string;
+  description?: string;
+}
+
 export interface Batch {
   id: string;
   date: string;
@@ -18,6 +23,7 @@ export interface Batch {
   currentCount: number;
   avatarUrl: string;
   qrCodeUrl: string;
+  qrCodes?: QRCodeItem[];
   notice: string;
   status: 'active' | 'invalid';
 }

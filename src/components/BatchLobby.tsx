@@ -28,6 +28,7 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
   const [now, setNow] = useState<number>(Date.now());
   const [filter, setFilter] = useState<'today' | 'history'>('today');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [zoomImage, setZoomImage] = useState<{ url: string; title?: string } | null>(null);
 
   // Set up 1-second interval to update live countdown
   useEffect(() => {
@@ -367,6 +368,45 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
                         </div>
                       </div>
 
+                      {/* QR Code Section (Placed right above Notice block) */}
+                      {(() => {
+                        const qrList = (batch.qrCodes && batch.qrCodes.length > 0)
+                          ? batch.qrCodes
+                          : (batch.qrCodeUrl ? [{ url: batch.qrCodeUrl, description: '微信拉群二维码' }] : []);
+
+                        if (qrList.length === 0) return null;
+
+                        return (
+                          <div className="mb-3 p-2.5 rounded-xl bg-slate-900/60 border border-white/5 space-y-1.5">
+                            <div className="text-[10px] text-slate-400 font-bold flex items-center justify-between">
+                              <span>📱 扫码进群/联系队长 ({qrList.length}张)</span>
+                              <span className="text-[9px] text-cyan-400">点击放大</span>
+                            </div>
+                            <div className={qrList.length === 1 ? 'flex justify-center' : 'grid grid-cols-2 gap-2'}>
+                              {qrList.map((qr, qIdx) => (
+                                <div
+                                  key={qIdx}
+                                  onClick={() => setZoomImage({ url: qr.url, title: qr.description || `二维码 ${qIdx + 1}` })}
+                                  className="flex flex-col items-center p-1.5 rounded-lg bg-slate-950/80 hover:bg-slate-900 border border-white/10 hover:border-cyan-500/50 cursor-pointer transition-all group/qr"
+                                >
+                                  {/* eslint-disable-next-html-element-suppression */}
+                                  <img
+                                    src={qr.url}
+                                    alt="QR Code"
+                                    className="w-20 h-20 object-contain rounded-md border border-cyan-500/20 group-hover/qr:scale-105 transition-transform"
+                                  />
+                                  {qr.description && (
+                                    <span className="text-[10px] text-cyan-300 font-medium mt-1 truncate max-w-full text-center px-1">
+                                      {qr.description}
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* Batch Notice Section with Copy Button */}
                       <div className="p-3 rounded-xl bg-slate-900/40 border border-white/5 mb-4 text-xs space-y-1.5">
                         <div className="flex items-center justify-between">
@@ -405,6 +445,40 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
           </div>
         </div>
       </div>
+
+      {/* QR Code Zoom Modal */}
+      {zoomImage && (
+        <div
+          onClick={() => setZoomImage(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-panel p-6 rounded-3xl border border-cyan-500/40 max-w-sm w-full space-y-4 text-center shadow-2xl relative animate-in zoom-in-95"
+          >
+            <button
+              onClick={() => setZoomImage(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            {zoomImage.title && (
+              <h3 className="text-sm font-extrabold text-cyan-300 tracking-tight pt-1">
+                {zoomImage.title}
+              </h3>
+            )}
+            <div className="p-3 bg-white rounded-2xl shadow-inner flex items-center justify-center">
+              {/* eslint-disable-next-html-element-suppression */}
+              <img
+                src={zoomImage.url}
+                alt="QR Code Enlarged"
+                className="w-full h-auto max-h-80 object-contain rounded-xl"
+              />
+            </div>
+            <p className="text-xs text-slate-400">长按或使用微信扫码进群</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
