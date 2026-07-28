@@ -36,6 +36,90 @@ export interface DataSchema {
 
 export const INITIAL_BATCHES: Batch[] = [
   {
+    id: '20260726-0019-66',
+    date: '2026-07-26',
+    time: '00:19:19',
+    targetScore: 66,
+    maxCapacity: 200,
+    currentCount: 0,
+    avatarUrl: '/avatars/老板.png',
+    qrCodeUrl: '/uploads/qr_group_66.png',
+    qrCodes: [
+      { url: '/uploads/qr_group_66.png', description: '呱呱并列 66 群' },
+      { url: '/uploads/qr_personal_guagua.png', description: '队长个人微信' },
+    ],
+    notice: `本群为66精准并列群（00:19:19晚班班次），非66的朋友请自觉退群。
+📢 活动并列第一怎么玩？
+• 第一天：进度66，0点前下线。
+• 第二天：凌晨看群通知，几百人秒级同步上线。
+• 分到一组的人：5人建群，商量好不要动进度。
+• 后面几天：继续保持同分，一起拿第一。`,
+    status: 'active',
+  },
+  {
+    id: '20260726-0919-66',
+    date: '2026-07-26',
+    time: '09:19:19',
+    targetScore: 66,
+    maxCapacity: 200,
+    currentCount: 0,
+    avatarUrl: '/avatars/老板.png',
+    qrCodeUrl: '/uploads/qr_group_66.png',
+    qrCodes: [
+      { url: '/uploads/qr_group_66.png', description: '呱呱并列 66 群' },
+      { url: '/uploads/qr_personal_guagua.png', description: '队长个人微信' },
+    ],
+    notice: `本群为66精准并列群（09:19:19早班班次），非66的朋友请自觉退群。
+📢 活动并列第一怎么玩？
+• 第一天：进度66，0点前下线。
+• 第二天：早晨看群通知，几百人秒级同步上线。
+• 分到一组的人：5人建群，商量好不要动进度。
+• 后面几天：继续保持同分，一起拿第一。`,
+    status: 'active',
+  },
+  {
+    id: '20260726-0019-106',
+    date: '2026-07-26',
+    time: '00:19:19',
+    targetScore: 106,
+    maxCapacity: 200,
+    currentCount: 0,
+    avatarUrl: '/avatars/老板.png',
+    qrCodeUrl: '/uploads/qr_group_106.png',
+    qrCodes: [
+      { url: '/uploads/qr_group_106.png', description: '呱呱并列 106 群' },
+      { url: '/uploads/qr_personal_guagua.png', description: '队长个人微信' },
+    ],
+    notice: `本群为106精准并列群（00:19:19晚班班次），非106的朋友请自觉退群。
+📢 活动并列第一怎么玩？
+• 第一天：进度106，0点前下线。
+• 第二天：凌晨看群通知，几百人秒级同步上线。
+• 分到一组的人：5人建群，商量好不要动进度。
+• 后面几天：继续保持同分，一起拿第一。`,
+    status: 'active',
+  },
+  {
+    id: '20260726-0919-106',
+    date: '2026-07-26',
+    time: '09:19:19',
+    targetScore: 106,
+    maxCapacity: 200,
+    currentCount: 0,
+    avatarUrl: '/avatars/老板.png',
+    qrCodeUrl: '/uploads/qr_group_106.png',
+    qrCodes: [
+      { url: '/uploads/qr_group_106.png', description: '呱呱并列 106 群' },
+      { url: '/uploads/qr_personal_guagua.png', description: '队长个人微信' },
+    ],
+    notice: `本群为106精准并列群（09:19:19早班班次），非106的朋友请自觉退群。
+📢 活动并列第一怎么玩？
+• 第一天：进度106，0点前下线。
+• 第二天：早晨看群通知，几百人秒级同步上线。
+• 分到一组的人：5人建群，商量好不要动进度。
+• 后面几天：继续保持同分，一起拿第一。`,
+    status: 'active',
+  },
+  {
     id: '20260727-0019-66',
     date: '2026-07-27',
     time: '00:19:19',

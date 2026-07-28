@@ -1,0 +1,533 @@
+{
+  "batches": [
+    {
+      "currentCount": 0,
+      "id": "20260729-0923-180",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 180 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "avatarUrl": "/avatars/老板.png",
+      "targetScore": 180,
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "time": "09:23:23",
+      "date": "2026-07-29",
+      "maxCapacity": 200,
+      "status": "active",
+      "notice": "本群为180精准并列群（09:23:23早班班次），非180的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度180，0点前下线。\n• 第二天：早晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。"
+    },
+    {
+      "currentCount": 0,
+      "id": "20260729-0923-105",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 105 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "avatarUrl": "/avatars/老板.png",
+      "targetScore": 105,
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "time": "09:23:23",
+      "date": "2026-07-29",
+      "maxCapacity": 200,
+      "status": "active",
+      "notice": "本群为105精准并列群（09:23:23早班班次），非105的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度105，0点前下线。\n• 第二天：早晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。"
+    },
+    {
+      "currentCount": 0,
+      "id": "20260729-0023-180",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 180 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "avatarUrl": "/avatars/老板.png",
+      "targetScore": 180,
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "time": "00:23:23",
+      "date": "2026-07-29",
+      "maxCapacity": 200,
+      "status": "active",
+      "notice": "本群为180精准并列群（00:23:23晚班班次），非180的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度180，0点前下线。\n• 第二天：凌晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。"
+    },
+    {
+      "currentCount": 0,
+      "id": "20260729-0023-105",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 105 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "avatarUrl": "/avatars/老板.png",
+      "targetScore": 105,
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "time": "00:23:23",
+      "date": "2026-07-29",
+      "maxCapacity": 200,
+      "status": "active",
+      "notice": "本群为105精准并列群（00:23:23晚班班次），非105的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度105，0点前下线。\n• 第二天：凌晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。"
+    },
+    {
+      "id": "20260726-0019-66",
+      "date": "2026-07-26",
+      "time": "00:19:19",
+      "targetScore": 66,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 66 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为66精准并列群（00:19:19晚班班次），非66的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度66，0点前下线。\n• 第二天：凌晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260726-0919-66",
+      "date": "2026-07-26",
+      "time": "09:19:19",
+      "targetScore": 66,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 66 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为66精准并列群（09:19:19早班班次），非66的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度66，0点前下线。\n• 第二天：早晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0019-66",
+      "date": "2026-07-27",
+      "time": "00:19:19",
+      "targetScore": 66,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 66 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为66精准并列群（00:19:19晚班班次），非66的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度66，0点前下线。\n• 第二天：凌晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0919-66",
+      "date": "2026-07-27",
+      "time": "09:19:19",
+      "targetScore": 66,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 66 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为66精准并列群（09:19:19早班班次），非66的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度66，0点前下线。\n• 第二天：早晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0015-66",
+      "date": "2026-07-28",
+      "time": "00:15:15",
+      "targetScore": 66,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 66 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为66精准并列群（晚班班次），发车时间将在28日0点10分解密公布，非66的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度66，0点前下线。\n• 第二天：看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0915-66",
+      "date": "2026-07-28",
+      "time": "09:15:15",
+      "targetScore": 66,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_66.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_66.png",
+          "description": "呱呱并列 66 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为66精准并列群（早班班次），发车时间将在28日0点10分解密公布，非66的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度66，0点前下线。\n• 第二天：看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260726-0019-106",
+      "date": "2026-07-26",
+      "time": "00:19:19",
+      "targetScore": 106,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 106 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为106精准并列群（00:19:19晚班班次），非106的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度106，0点前下线。\n• 第二天：凌晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260726-0919-106",
+      "date": "2026-07-26",
+      "time": "09:19:19",
+      "targetScore": 106,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 106 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为106精准并列群（09:19:19早班班次），非106的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度106，0点前下线。\n• 第二天：早晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0019-106",
+      "date": "2026-07-27",
+      "time": "00:19:19",
+      "targetScore": 106,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 106 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为106精准并列群（00:19:19晚班班次），非106的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度106，0点前下线。\n• 第二天：凌晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0919-106",
+      "date": "2026-07-27",
+      "time": "09:19:19",
+      "targetScore": 106,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 106 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为106精准并列群（09:19:19早班班次），非106的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度106，0点前下线。\n• 第二天：早晨看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0015-106",
+      "date": "2026-07-28",
+      "time": "00:15:15",
+      "targetScore": 106,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 106 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为106精准并列群（晚班班次），发车时间将在28日0点10分解密公布，非106的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度106，0点前下线。\n• 第二天：看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0915-106",
+      "date": "2026-07-28",
+      "time": "09:15:15",
+      "targetScore": 106,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/老板.png",
+      "qrCodeUrl": "/uploads/qr_group_106.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_106.png",
+          "description": "呱呱并列 106 群"
+        },
+        {
+          "url": "/uploads/qr_personal_guagua.png",
+          "description": "队长个人微信"
+        }
+      ],
+      "notice": "本群为106精准并列群（早班班次），发车时间将在28日0点10分解密公布，非106的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度106，0点前下线。\n• 第二天：看群通知，几百人秒级同步上线。\n• 分到一组的人：5人建群，商量好不要动进度。\n• 后面几天：继续保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0006-67",
+      "date": "2026-07-27",
+      "time": "00:06:06",
+      "targetScore": 67,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁67及以上精准并列群（00:06:06凌晨班），非对应分数的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度达到目标分，0点前下线。\n• 第二天：凌晨看群通知，同步上线。\n• 分到一组的人：商量好保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0856-67",
+      "date": "2026-07-27",
+      "time": "08:56:56",
+      "targetScore": 67,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁67及以上精准并列群（08:56:56上午班），非对应分数的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度达到目标分，0点前下线。\n• 第二天：早晨看群通知，同步上线。\n• 分到一组的人：商量好保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0006-67",
+      "date": "2026-07-28",
+      "time": "00:06:06",
+      "targetScore": 67,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁67及以上精准并列群（明日00:06:06凌晨班），非对应分数的朋友请自觉退群。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0856-67",
+      "date": "2026-07-28",
+      "time": "08:56:56",
+      "targetScore": 67,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁67及以上精准并列群（明日08:56:56上午班），非对应分数的朋友请自觉退群。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0006-107",
+      "date": "2026-07-27",
+      "time": "00:06:06",
+      "targetScore": 107,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁107及以上精准并列群（00:06:06凌晨班），非对应分数的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度达到目标分，0点前下线。\n• 第二天：凌晨看群通知，同步上线。\n• 分到一组的人：商量好保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260727-0856-107",
+      "date": "2026-07-27",
+      "time": "08:56:56",
+      "targetScore": 107,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁107及以上精准并列群（08:56:56上午班），非对应分数的朋友请自觉退群。\n📢 活动并列第一怎么玩？\n• 第一天：进度达到目标分，0点前下线。\n• 第二天：早晨看群通知，同步上线。\n• 分到一组的人：商量好保持同分，一起拿第一。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0006-107",
+      "date": "2026-07-28",
+      "time": "00:06:06",
+      "targetScore": 107,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁107及以上精准并列群（明日00:06:06凌晨班），非对应分数的朋友请自觉退群。",
+      "status": "active"
+    },
+    {
+      "id": "20260728-0856-107",
+      "date": "2026-07-28",
+      "time": "08:56:56",
+      "targetScore": 107,
+      "maxCapacity": 200,
+      "currentCount": 0,
+      "avatarUrl": "/avatars/科萌.png",
+      "qrCodeUrl": "/uploads/qr_group_orange.png",
+      "qrCodes": [
+        {
+          "url": "/uploads/qr_group_orange.png",
+          "description": "橙汁并列 67/107 群"
+        },
+        {
+          "url": "/uploads/qr_personal_orange.png",
+          "description": "橙汁/北北 微信"
+        }
+      ],
+      "notice": "本群为橙汁107及以上精准并列群（明日08:56:56上午班），非对应分数的朋友请自觉退群。",
+      "status": "active"
+    }
+  ],
+  "bookings": {}
+}

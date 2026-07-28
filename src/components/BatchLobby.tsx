@@ -54,20 +54,71 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
     }
   };
 
-  // Helper to format countdown timer for each batch
-  const getCountdownString = (dateStr: string, timeStr: string) => {
+  // Helper to format countdown timer & unlock status for each batch
+  const getCountdownString = (dateStr: string, timeStr: string, targetScore?: number) => {
     try {
+      const isOrangeBatch = targetScore === 67 || targetScore === 107;
       const normalizedTime = timeStr.trim().split(':').length === 2 ? `${timeStr.trim()}:00` : timeStr.trim();
       const targetTime = new Date(`${dateStr.trim()}T${normalizedTime}`).getTime();
 
-      if (isNaN(targetTime)) {
-        return { isExpired: false, text: '时间待定' };
+      // Orange batches (67, 107) are NEVER masked, always unlocked directly!
+      if (isOrangeBatch) {
+        const diffMs = targetTime - now;
+        if (diffMs <= 0) {
+          return { isExpired: true, isUnlocked: true, text: '已到发车时间', label: '实时发车倒计时' };
+        }
+        const totalSecs = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSecs / 86400);
+        const hours = Math.floor((totalSecs % 86400) / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        const pad = (num: number) => String(num).padStart(2, '0');
+
+        let text = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+        if (days > 0) {
+          text = `${days}天 ${text}`;
+        }
+        return { isExpired: false, isUnlocked: true, text, label: '实时发车倒计时' };
       }
 
+      // Guagua batches: unlock at 00:10:00 (10 minutes after midnight on batch date)
+      const unlockTime = new Date(`${dateStr.trim()}T00:10:00`).getTime();
+
+      if (isNaN(targetTime)) {
+        return { isExpired: false, isUnlocked: true, text: '时间待定', label: '实时发车倒计时' };
+      }
+
+      // Check if unlocked (unlocked when now >= unlockTime)
+      const isUnlocked = isNaN(unlockTime) || now >= unlockTime;
+
+      if (!isUnlocked) {
+        // Before 00:10:00 of batch date: Countdown to 00:10:00 unlock
+        const diffMs = unlockTime - now;
+        const totalSecs = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSecs / 86400);
+        const hours = Math.floor((totalSecs % 86400) / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        const pad = (num: number) => String(num).padStart(2, '0');
+
+        let text = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+        if (days > 0) {
+          text = `${days}天 ${text}`;
+        }
+
+        return {
+          isExpired: false,
+          isUnlocked: false,
+          text,
+          label: '距离 24 点 10 分解密',
+        };
+      }
+
+      // Unlocked (now >= 00:00:00 of batch date): Countdown to departure time
       const diffMs = targetTime - now;
 
       if (diffMs <= 0) {
-        return { isExpired: true, text: '已到发车时间' };
+        return { isExpired: true, isUnlocked: true, text: '已到发车时间', label: '实时发车倒计时' };
       }
 
       const totalSecs = Math.floor(diffMs / 1000);
@@ -78,12 +129,14 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
 
       const pad = (num: number) => String(num).padStart(2, '0');
 
+      let text = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
       if (days > 0) {
-        return { isExpired: false, text: `${days}天 ${pad(hours)}:${pad(mins)}:${pad(secs)}` };
+        text = `${days}天 ${text}`;
       }
-      return { isExpired: false, text: `${pad(hours)}:${pad(mins)}:${pad(secs)}` };
+
+      return { isExpired: false, isUnlocked: true, text, label: '实时发车倒计时' };
     } catch {
-      return { isExpired: false, text: '计算中...' };
+      return { isExpired: false, isUnlocked: true, text: '计算中...', label: '实时发车倒计时' };
     }
   };
 
@@ -313,7 +366,7 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
             ) : (
               filteredBatches.map((batch) => {
                 const isInvalid = batch.status === 'invalid';
-                const countdown = getCountdownString(batch.date, batch.time);
+                const countdown = getCountdownString(batch.date, batch.time, batch.targetScore);
                 const isHistorical = batch.date < todayStr;
 
                 return (
@@ -345,7 +398,7 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
                       {/* HERO BANNER: Departure Time + Giant Countdown */}
                       <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-white/10 mb-3 space-y-2.5 relative overflow-hidden text-center">
                         <span className="text-[10px] text-emerald-400/90 font-bold uppercase tracking-wider block">
-                          实时发车倒计时
+                          {countdown.label}
                         </span>
                         <div className="text-2xl md:text-3xl font-black font-mono tracking-tight text-emerald-300 group-hover:text-emerald-200 transition-colors">
                           {countdown.text}
@@ -356,7 +409,7 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
                       <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 mb-3 text-[11px] font-mono space-y-1">
                         <div className="flex items-center justify-between font-bold text-slate-200">
                           <span className="text-emerald-400 flex items-center gap-1">
-                            🚀 {batch.time} 发车
+                            🚀 {countdown.isUnlocked ? `${batch.time} 发车` : '??:??:?? (待解锁)'}
                           </span>
                           <span className="text-slate-400 flex items-center gap-1">
                             📅 {batch.date}
@@ -393,7 +446,10 @@ export const BatchLobby: React.FC<BatchLobbyProps> = ({ onEnterCabin }) => {
                                   <img
                                     src={qr.url}
                                     alt="QR Code"
-                                    className="w-20 h-20 object-contain rounded-md border border-cyan-500/20 group-hover/qr:scale-105 transition-transform"
+                                    className="w-20 h-20 object-contain rounded-md border border-cyan-500/20 group-hover/qr:scale-105 transition-transform bg-slate-950"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src = '/uploads/qr_group_66.png';
+                                    }}
                                   />
                                   {qr.description && (
                                     <span className="text-[10px] text-cyan-300 font-medium mt-1 truncate max-w-full text-center px-1">

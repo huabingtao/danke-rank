@@ -25,8 +25,16 @@ export interface CabinRoomProps {
 export const CabinRoom: React.FC<CabinRoomProps> = ({ batch, onBackLobby }) => {
   const { user, unlockBooking, markBatchInvalid } = useStore();
 
-  // 1. 调用高精度秒/两位数毫秒级跳跃倒计时 Hook (合并日期与时间)
-  const targetDateTime = batch.date ? `${batch.date} ${batch.time}` : batch.time;
+  // 1. 解密状态判断与倒计时目标判定（橙汁班次直显；呱呱班次设为 00:10:00 解密）
+  const isOrangeBatch = batch.targetScore === 67 || batch.targetScore === 107;
+  const unlockTime = batch.date ? new Date(`${batch.date}T00:10:00`).getTime() : 0;
+  const isUnlocked = isOrangeBatch || !unlockTime || isNaN(unlockTime) || Date.now() >= unlockTime;
+
+  // 未解密时，倒计时目标设为 24 点 10 分 (00:10:00)；解密后，设为具体发车时间
+  const targetDateTime = !isUnlocked
+    ? `${batch.date} 00:10:00`
+    : (batch.date ? `${batch.date} ${batch.time}` : batch.time);
+
   const { hours, mins, secs, ms } = usePrecisionTimer(targetDateTime);
 
   // 状态管理
@@ -94,7 +102,7 @@ export const CabinRoom: React.FC<CabinRoomProps> = ({ batch, onBackLobby }) => {
 
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-white tracking-tight">
-              【{batch.time}】发车车厢
+              【{isUnlocked ? batch.time : '??:??:?? (待解锁)'}】发车车厢
             </h2>
             <span className="font-mono text-xs font-bold text-blue-400 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20">
               #{batch.id}
@@ -117,8 +125,8 @@ export const CabinRoom: React.FC<CabinRoomProps> = ({ batch, onBackLobby }) => {
             <h3 className="text-lg sm:text-xl md:text-2xl font-black text-slate-100 tracking-wide flex flex-wrap items-center gap-2">
               <span>距离</span>
               {batch.date && <span className="text-cyan-400 font-mono">{batch.date}</span>}
-              <span className="text-cyan-300 font-mono">{batch.time}</span>
-              <span>发车倒计时</span>
+              <span className="text-cyan-300 font-mono">{isUnlocked ? batch.time : '24点10分 (00:10:00)'}</span>
+              <span>{isUnlocked ? '发车倒计时' : '解密倒计时'}</span>
             </h3>
           </div>
 
@@ -242,7 +250,10 @@ export const CabinRoom: React.FC<CabinRoomProps> = ({ batch, onBackLobby }) => {
                         <img
                           src={qr.url}
                           alt="QR Code"
-                          className="w-24 h-24 object-contain rounded-lg border border-cyan-500/30 group-hover/qr:scale-105 transition-transform"
+                          className="w-24 h-24 object-contain rounded-lg border border-cyan-500/30 group-hover/qr:scale-105 transition-transform bg-slate-950"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/uploads/qr_group_66.png';
+                          }}
                         />
                         {qr.description && (
                           <span className="text-xs text-cyan-300 font-medium mt-1 truncate max-w-full text-center">

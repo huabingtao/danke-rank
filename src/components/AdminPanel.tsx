@@ -119,35 +119,55 @@ export const AdminPanel: React.FC = () => {
   const [createQrCodes, setCreateQrCodes] = useState<{ url: string; description: string }[]>([]);
 
   // Handle local image file upload for QR code
-  const handleQrFileUpload = (file: File, isEdit: boolean = false, indexToUpdate?: number) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      if (!dataUrl) return;
+  const handleQrFileUpload = async (file: File, isEdit: boolean = false, indexToUpdate?: number) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      let imageUrl = data.success ? data.url : '';
+
+      if (!imageUrl) {
+        imageUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve((e.target?.result as string) || '');
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (!imageUrl) return;
 
       if (!isEdit) {
         setCreateQrCodes((prev) => {
           if (indexToUpdate !== undefined && prev[indexToUpdate]) {
             const next = [...prev];
-            next[indexToUpdate] = { ...next[indexToUpdate], url: dataUrl };
+            next[indexToUpdate] = { ...next[indexToUpdate], url: imageUrl };
             return next;
           }
           if (prev.length >= 2) return prev;
-          return [...prev, { url: dataUrl, description: '' }];
+          return [...prev, { url: imageUrl, description: '' }];
         });
       } else {
         if (!editingBatch) return;
-        const currentQrs = editingBatch.qrCodes || [];
+        const currentQrs = (editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
+          ? [...editingBatch.qrCodes]
+          : (editingBatch.qrCodeUrl ? [{ url: editingBatch.qrCodeUrl, description: '' }] : []);
         let nextQrs = [...currentQrs];
         if (indexToUpdate !== undefined && nextQrs[indexToUpdate]) {
-          nextQrs[indexToUpdate] = { ...nextQrs[indexToUpdate], url: dataUrl };
+          nextQrs[indexToUpdate] = { ...nextQrs[indexToUpdate], url: imageUrl };
         } else {
-          nextQrs.push({ url: dataUrl, description: '' });
+          nextQrs.push({ url: imageUrl, description: '' });
         }
-        setEditingBatch({ ...editingBatch, qrCodes: nextQrs });
+        setEditingBatch({ ...editingBatch, qrCodes: nextQrs, qrCodeUrl: nextQrs[0]?.url || '' });
       }
-    };
-    reader.readAsDataURL(file);
+      showNotification('success', '图片上传成功！');
+    } catch (e) {
+      console.error('Upload failed:', e);
+      showNotification('error', '图片上传失败');
+    }
   };
 
   // Handle new batch submission
@@ -837,22 +857,41 @@ export const AdminPanel: React.FC = () => {
                       <img
                         src={item.url}
                         alt={`QR ${idx + 1}`}
-                        className="w-10 h-10 rounded-lg object-cover border border-cyan-500/30 shrink-0"
-                      />
-                      <input
-                        type="text"
-                        placeholder={`二维码 ${idx + 1} 描述`}
-                        value={item.description || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const currentQrs = (editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
-                            ? [...editingBatch.qrCodes]
-                            : (editingBatch.qrCodeUrl ? [{ url: editingBatch.qrCodeUrl, description: '' }] : []);
-                          currentQrs[idx] = { ...currentQrs[idx], description: val };
-                          setEditingBatch({ ...editingBatch, qrCodes: currentQrs, qrCodeUrl: currentQrs[0]?.url || '' });
+                        className="w-10 h-10 rounded-lg object-cover border border-cyan-500/30 shrink-0 bg-slate-950"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/uploads/qr_group_66.png';
                         }}
-                        className="flex-1 glass-input px-3 py-1.5 rounded-lg text-slate-100 text-xs font-mono"
                       />
+                      <div className="flex-1 space-y-1">
+                        <input
+                          type="text"
+                          placeholder="图片 URL 地址 (如 /uploads/qr_group_66.png)"
+                          value={item.url || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const currentQrs = (editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
+                              ? [...editingBatch.qrCodes]
+                              : (editingBatch.qrCodeUrl ? [{ url: editingBatch.qrCodeUrl, description: '' }] : []);
+                            currentQrs[idx] = { ...currentQrs[idx], url: val };
+                            setEditingBatch({ ...editingBatch, qrCodes: currentQrs, qrCodeUrl: currentQrs[0]?.url || '' });
+                          }}
+                          className="w-full glass-input px-2.5 py-1 rounded-lg text-slate-100 text-[11px] font-mono"
+                        />
+                        <input
+                          type="text"
+                          placeholder={`二维码 ${idx + 1} 描述标签`}
+                          value={item.description || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const currentQrs = (editingBatch.qrCodes && editingBatch.qrCodes.length > 0)
+                              ? [...editingBatch.qrCodes]
+                              : (editingBatch.qrCodeUrl ? [{ url: editingBatch.qrCodeUrl, description: '' }] : []);
+                            currentQrs[idx] = { ...currentQrs[idx], description: val };
+                            setEditingBatch({ ...editingBatch, qrCodes: currentQrs, qrCodeUrl: currentQrs[0]?.url || '' });
+                          }}
+                          className="w-full glass-input px-2.5 py-1 rounded-lg text-slate-100 text-[11px] font-mono"
+                        />
+                      </div>
                       <label className="p-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 cursor-pointer text-[10px] shrink-0">
                         <span>更换</span>
                         <input
