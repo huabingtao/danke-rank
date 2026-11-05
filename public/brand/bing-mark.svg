@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>并列发车 · 并字徽章</title>
+  <defs>
+    <linearGradient id="amber" x1="10" y1="5" x2="53" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD278"/><stop offset=".53" stop-color="#FF9F27"/><stop offset="1" stop-color="#F46A13"/></linearGradient>
+    <clipPath id="disc"><circle cx="32" cy="32" r="29.5"/></clipPath>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="#0B1220"/>
+  <circle cx="32" cy="32" r="29.5" fill="url(#amber)"/>
+  <g clip-path="url(#disc)" stroke="#763411" opacity=".16" stroke-width="1.3"><path d="M-5 36 53 2M0 47 64 10M6 58 70 21M18 65 76 31" stroke-width="2"/></g>
+  <circle cx="32" cy="32" r="26" stroke="#FFF2CE" stroke-opacity=".5"/>
+  <!-- Outlined glyph: no client font dependency. -->
+  <path d="M703 -123Q664 -118 624 -123Q628 -49 628 24V267H397V210Q397 149 371.5 92.0Q346 35 304 -9Q221 -97 93 -133Q83 -87 42 -64Q161 -50 242.5 31.5Q324 113 324 210V267H170Q112 267 54 264Q57 295 54 327Q112 324 170 324H324V539H213Q155 539 97 536Q100 568 97 599Q155 596 213 596H553L579 638L689 831Q722 808 759 792Q733 744 704 698L639 596H832Q891 596 949 599Q945 568 949 536Q891 539 832 539H700V324H866Q924 324 982 327Q979 295 982 264Q924 267 866 267H700V24Q700 -49 703 -123ZM395 610Q319 713 232 806L289 860Q381 764 459 658ZM628 324V539H397V324Z" transform="translate(11.8912 46.2764) scale(0.039275 -0.039275)" fill="#142033" stroke="#142033" stroke-width="12" stroke-linejoin="round"/>
+  <path d="m50 9 1.2 3.2 3.3 1.1-3.3 1.2-1.2 3.2-1.1-3.2-3.3-1.2 3.3-1.1Z" fill="#FFF4D7"/>
+</svg>

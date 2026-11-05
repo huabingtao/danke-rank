@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/brand/bing-mark.svg',
+    apple: '/brand/bing-mark-180.png',
+  },
   title: '弹壳特工队 - 并列发车与攻略协作平台',
   description: 'Minimalist Art 风格的《弹壳特工队》并列发车组队、战力匹配与攻略协作平台',
 };

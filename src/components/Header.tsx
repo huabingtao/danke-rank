@@ -8,13 +8,13 @@ export const Header: React.FC = () => {
       <div className="app-container flex items-center justify-between gap-4">
         {/* Brand Logo & Title */}
         <div className="flex items-center gap-3">
-          <div className="relative group cursor-pointer">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 via-emerald-400 to-teal-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-              弹
-            </div>
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400" />
-          </div>
+          <img
+            src="/brand/bing-mark.svg"
+            alt="并列发车"
+            width={40}
+            height={40}
+            className="h-9 w-9 md:h-10 md:w-10 shrink-0 rounded-full"
+          />
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
